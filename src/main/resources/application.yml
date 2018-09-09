@@ -1,0 +1,42 @@
+server:
+  port: 8020
+  servlet:
+    context-path: /beedo
+spring:
+  data:
+    mongodb:
+      host: 127.0.0.1
+      port: 27017
+  application:
+    name: beedo
+  jpa:
+    database-platform: com.seagull.beedo.config.SQLiteDialect
+    generate-ddl: true
+    hibernate:
+        ddl-auto: update
+    database: mysql
+    show-sql: true
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/beedo?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+    driver-class-name: com.mysql.jdbc.Driver
+    username: root
+    password:
+
+
+management:
+  endpoints:
+    server:
+      port: 8889
+    web:
+      base-path: /actuator
+      #开启所有端点
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+info:
+  application: beedo
+  author: huangguosheng
+  email: 290529123@qq.com
+
