@@ -5,8 +5,6 @@
 package com.seagull.beedo.model;
 
 import lombok.Data;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.Date;
 import java.util.Map;
@@ -28,7 +26,7 @@ public class TaskNodeInfo {
     /**
      * k:ElementParseDO id    v:保存在数据库中的属性名
      */
-    private Map<String, String> elementIds;
+    private Map<Object, String> elementIds;
 
     /**
      * 创建时间

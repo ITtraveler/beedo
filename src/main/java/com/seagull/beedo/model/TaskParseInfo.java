@@ -56,6 +56,13 @@ public class TaskParseInfo {
     private TaskStatusEnum taskStatus;
 
     /**
+     * mongodb name
+     */
+    private String dbname;
+
+    private String memo;
+
+    /**
      * 创建时间
      */
     private Date gmtCreate;
