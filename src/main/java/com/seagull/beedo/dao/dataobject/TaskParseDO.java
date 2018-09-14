@@ -6,17 +6,12 @@ package com.seagull.beedo.dao.dataobject;
 
 import com.seagull.beedo.common.enums.TaskStatusEnum;
 import lombok.Data;
+import lombok.Value;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 
 
@@ -27,6 +22,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "beedo_task_parse")
+@EntityListeners(AuditingEntityListener.class)
 @Data
 public class TaskParseDO {
     /**
@@ -67,6 +63,18 @@ public class TaskParseDO {
     @Enumerated(EnumType.STRING)
     @Column(length = 8)
     private TaskStatusEnum taskStatus;
+
+    /**
+     * 数据库名
+     */
+    @Column(length = 32)
+    private String dbname;
+
+    /**
+     * memo
+     */
+    @Column(length = 512)
+    private String memo;
 
     /**
      * 创建时间

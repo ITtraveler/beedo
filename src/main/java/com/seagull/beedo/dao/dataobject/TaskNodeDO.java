@@ -7,13 +7,9 @@ package com.seagull.beedo.dao.dataobject;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.Map;
 
@@ -25,6 +21,7 @@ import java.util.Map;
  */
 @Entity
 @Table(name = "beedo_task_node")
+@EntityListeners(AuditingEntityListener.class)
 @Data
 public class TaskNodeDO {
     @Id

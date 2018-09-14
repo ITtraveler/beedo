@@ -5,6 +5,7 @@
 package com.seagull.beedo.component;
 
 import com.alibaba.fastjson.JSON;
+import com.seagull.beedo.common.enums.TaskStatusEnum;
 import com.seagull.beedo.dao.TaskNodeDao;
 import com.seagull.beedo.dao.TaskParseDao;
 import com.seagull.beedo.dao.dataobject.TaskNodeDO;
@@ -59,7 +60,7 @@ public class TaskParseComponent {
         taskParseInfo.setUid(RandomUtils.getUUID());
         TaskParseDO taskParseDO = new TaskParseDO();
         BeanUtils.copyProperties(taskParseInfo, taskParseDO);
-
+        taskParseDO.setTaskStatus(TaskStatusEnum.INIT);
         TaskParseDO saveTask = taskParseDao.save(taskParseDO);
         List<TaskNodeInfo> nodes = taskParseInfo.getParseNodes();
         nodes.forEach(taskNodeInfo -> {
@@ -67,6 +68,7 @@ public class TaskParseComponent {
             taskNodeDO.setDocumentId(taskNodeInfo.getDocumentId());
             taskNodeDO.setTaskParseUid(saveTask.getUid());
             taskNodeDO.setElementMap(JSON.toJSONString(taskNodeInfo.getElementIds()));
+            taskNodeDao.save(taskNodeDO);
         });
 
         logger.info(MessageFormat.format("保存解析的文档数据成功,TaskParseInfo:{0}", taskParseInfo));
@@ -105,7 +107,7 @@ public class TaskParseComponent {
      */
     public PageList<TaskParseInfo> getTaskPage(QueryBase queryBase) {
         org.springframework.data.domain.Page<TaskParseDO> TaskParsePage = taskParseDao.findAll
-                (PageRequest.of(queryBase.pageNum, queryBase.getPageSize() == 0 ? 1 : queryBase.getPageSize()));
+                (PageRequest.of(queryBase.pageNum-1, queryBase.getPageSize()));
         Iterator<TaskParseDO> iterator = TaskParsePage.iterator();
         ArrayList<TaskParseInfo> taskParseInfoList = new ArrayList<>();
 
@@ -123,7 +125,6 @@ public class TaskParseComponent {
                 TaskNodeInfo taskNodeInfo = new TaskNodeInfo();
                 BeanUtils.copyProperties(taskNodeDO, taskNodeInfo);
                 taskNodeInfo.setElementIds(JSON.parseObject(taskNodeDO.getElementMap(), HashMap.class));
-                ;
                 taskNodeInfoList.add(taskNodeInfo);
             });
 

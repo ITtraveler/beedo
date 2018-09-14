@@ -69,7 +69,7 @@ public class ParseCoolExecute {
                         }
 
                         parseNodes.forEach(taskNodeInfo -> {
-                            Map<String, String> elementIdMap = taskNodeInfo.getElementIds();
+                            Map<Object, String> elementIdMap = taskNodeInfo.getElementIds();
 
                             Integer documentUid = taskNodeInfo.getDocumentId();
                             // TODO: 2018/8/11  得到DocumentParseInfo
