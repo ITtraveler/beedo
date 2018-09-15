@@ -156,14 +156,29 @@ public class TaskParseComponent {
         //删除task节点信息
         taskNodeDao.deleteByTaskParseUid(taskParseInfo.getUid());
 
-        //保存task新的task节点
+        //task新的task节点
         List<TaskNodeInfo> nodes = taskParseInfo.getParseNodes();
         nodes.forEach(taskNodeInfo -> {
             TaskNodeDO taskNodeDO = new TaskNodeDO();
             taskNodeDO.setDocumentId(taskNodeInfo.getDocumentId());
             taskNodeDO.setTaskParseUid(taskParseInfo.getUid());
             taskNodeDO.setElementMap(JSON.toJSONString(taskNodeInfo.getElementIds()));
+            taskNodeDao.save(taskNodeDO);
         });
+        return true;
+    }
+
+    @Transactional
+    public boolean updateTaskStatus(String uid,TaskStatusEnum statusEnum){
+        if(statusEnum == null){
+            logger.error("更新解析的文档状态失败，状态为空");
+            return false;
+        }
+
+        //更新
+        TaskParseDO taskParseDO = taskParseDao.findByUidForUpdate(uid);
+        taskParseDO.setTaskStatus(statusEnum);
+        taskParseDao.save(taskParseDO);
         return true;
     }
 

@@ -4,6 +4,7 @@
  */
 package com.seagull.beedo.web.controller;
 
+import com.seagull.beedo.common.enums.TaskStatusEnum;
 import com.seagull.beedo.component.TaskParseComponent;
 import com.seagull.beedo.model.TaskParseInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,6 +98,30 @@ public class BeedoTaskController extends BaseController {
             retFail(result);
         }
         return result;
+    }
+
+    /**
+     * 更新任务状态
+     * @param uid
+     * @param status
+     * @return
+     */
+    @PutMapping("{uid}/status/{status}")
+    public Object changeStatus(@PathVariable String uid, @PathVariable String status) {
+        CommonResult<String> result = new CommonResult<>();
+
+        TaskStatusEnum taskStatusEnum = TaskStatusEnum.codeOf(status);
+        if (taskStatusEnum == null) {
+            retFail(result, "状态有误");
+            return result;
+        }
+
+        boolean update = taskParseComponent.updateTaskStatus(uid, taskStatusEnum);
+        if (!update) {
+            retFail(result);
+        }
+        return result;
+
     }
 
     /**
