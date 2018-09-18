@@ -53,12 +53,6 @@ public class DocumentParseComponent {
      */
     @Transactional
     public void saveDocument(DocumentParseInfo documentParseInfo) {
-        //设置uid
-        //documentParseInfo.setUid(RandomUtils.getUUID());
-       /* for (ElementParseInfo elementParseInfo : documentParseInfo.getElements()) {
-            elementParseInfo.setUid(RandomUtils.getUUID());
-        }*/
-
         DocumentParseDO documentParseDO = new DocumentParseDO();
         BeanUtils.copyProperties(documentParseInfo, documentParseDO);
 
@@ -80,7 +74,7 @@ public class DocumentParseComponent {
      * @param documentId
      * @return
      */
-    public DocumentParseInfo getDocumentById(Integer documentId) {
+    public DocumentParseInfo getDocumentById(int documentId) {
         DocumentParseInfo documentParseInfo = new DocumentParseInfo();
 
         //document
@@ -98,6 +92,19 @@ public class DocumentParseComponent {
         });
 
         return documentParseInfo;
+    }
+
+    /**
+     * 获取element
+     *
+     * @param elementId
+     * @return
+     */
+    public ElementParseInfo getElementById(int elementId) {
+        ElementParseInfo elementParseInfo = new ElementParseInfo();
+        Optional<ElementParseDO> elementParseDO = elementParseDao.findById(elementId);
+        BeanUtils.copyProperties(elementParseDO.get(), elementParseInfo);
+        return elementParseInfo;
     }
 
     /**

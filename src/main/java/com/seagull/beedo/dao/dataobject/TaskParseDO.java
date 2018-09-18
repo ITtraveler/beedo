@@ -5,6 +5,7 @@
 package com.seagull.beedo.dao.dataobject;
 
 import com.seagull.beedo.common.enums.TaskStatusEnum;
+import com.seagull.beedo.web.test;
 import lombok.Data;
 import lombok.Value;
 import org.springframework.data.annotation.CreatedDate;
@@ -17,6 +18,7 @@ import java.util.Date;
 
 /**
  * 任务解析的信息
+ *
  * @author guosheng.huang
  * @version $id:TaskParseDO.java, v 0.1 2018年08月11日 20:45 tao.hu Exp $
  */
@@ -68,7 +70,13 @@ public class TaskParseDO {
      * 数据库名
      */
     @Column(length = 32)
-    private String dbname;
+    private String collectionName;
+
+    /**
+     * 是否需要优化爬虫结果
+     */
+   // @Column(columnDefinition = "char(1)")
+   // private Character optimize;
 
     /**
      * memo
@@ -87,5 +95,19 @@ public class TaskParseDO {
      */
     @LastModifiedDate
     private Date gmtModified;
+/*
+    public Boolean getOptimize() {
+        if (optimize == null) {
+            return Boolean.FALSE;
+        }
+        return optimize == 'Y' ? Boolean.TRUE : Boolean.FALSE;
+    }
 
+    public void setOptimize(Boolean optimize) {
+        if (optimize == null) {
+            this.optimize = 'N';
+        } else {
+            this.optimize = optimize ? 'Y' : 'N';
+        }
+    }*/
 }

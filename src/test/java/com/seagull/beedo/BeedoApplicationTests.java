@@ -20,15 +20,15 @@ public class BeedoApplicationTests {
     private ParseTask executeComponent;
     @Test
     public void contextLoads() {
-        ArrayList<TaskParseInfo> taskParseInfos = new ArrayList<>();
+        /*rrayList<TaskParseInfo> taskParseInfos = new ArrayList<>();
         TaskParseInfo TaskParseInfo = new TaskParseInfo();
         TaskParseInfo.setUid(RandomUtils.getUUID());
         TaskParseInfo.setCron("0/10 * * * * ?");
         TaskParseInfo.setName("测试");
         TaskParseInfo.setTaskStatus(TaskStatusEnum.VALID);
         TaskParseInfo.setThreadCoolSize(4);
-        taskParseInfos.add(TaskParseInfo);
-       // executeComponent.exec(taskParseInfos);
+        taskParseInfos.add(TaskParseInfo);*/
+        executeComponent.exec();
     }
 
 }

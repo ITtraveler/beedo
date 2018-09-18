@@ -24,12 +24,14 @@ import team.seagull.common.base.common.page.PageAttribute;
 import team.seagull.common.base.common.page.PageList;
 import team.seagull.common.base.query.QueryBase;
 import team.seagull.common.base.utils.RandomUtils;
+import team.seagull.common.base.utils.StringUtils;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -60,6 +62,11 @@ public class TaskParseComponent {
         taskParseInfo.setUid(RandomUtils.getUUID());
         TaskParseDO taskParseDO = new TaskParseDO();
         BeanUtils.copyProperties(taskParseInfo, taskParseDO);
+
+        if (StringUtils.isBlank(taskParseDO.getCollectionName())) {
+            taskParseDO.setCollectionName(RandomUtils.getUUID());
+        }
+
         taskParseDO.setTaskStatus(TaskStatusEnum.INIT);
         TaskParseDO saveTask = taskParseDao.save(taskParseDO);
         List<TaskNodeInfo> nodes = taskParseInfo.getParseNodes();
@@ -107,7 +114,7 @@ public class TaskParseComponent {
      */
     public PageList<TaskParseInfo> getTaskPage(QueryBase queryBase) {
         org.springframework.data.domain.Page<TaskParseDO> TaskParsePage = taskParseDao.findAll
-                (PageRequest.of(queryBase.pageNum-1, queryBase.getPageSize()));
+                (PageRequest.of(queryBase.pageNum - 1, queryBase.getPageSize()));
         Iterator<TaskParseDO> iterator = TaskParsePage.iterator();
         ArrayList<TaskParseInfo> taskParseInfoList = new ArrayList<>();
 
@@ -147,6 +154,11 @@ public class TaskParseComponent {
         //更新task信息
         TaskParseDO taskParseDO = new TaskParseDO();
         BeanUtils.copyProperties(taskParseInfo, taskParseDO);
+
+        if (StringUtils.isBlank(taskParseDO.getCollectionName())) {
+            taskParseDO.setCollectionName(RandomUtils.getUUID());
+        }
+
         TaskParseDO result = taskParseDao.save(taskParseDO);
         if (result == null) {
             logger.error(MessageFormat.format("更新解析的文档数据失败,TaskParseInfo:{0}", taskParseInfo));
@@ -169,8 +181,8 @@ public class TaskParseComponent {
     }
 
     @Transactional
-    public boolean updateTaskStatus(String uid,TaskStatusEnum statusEnum){
-        if(statusEnum == null){
+    public boolean updateTaskStatus(String uid, TaskStatusEnum statusEnum) {
+        if (statusEnum == null) {
             logger.error("更新解析的文档状态失败，状态为空");
             return false;
         }

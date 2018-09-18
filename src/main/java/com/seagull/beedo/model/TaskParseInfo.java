@@ -56,9 +56,14 @@ public class TaskParseInfo {
     private TaskStatusEnum taskStatus;
 
     /**
-     * mongodb name
+     * mongodb collectionName
      */
-    private String dbname;
+    private String collectionName;
+
+    /**
+     * 是否需要优化爬虫结果
+     */
+    private boolean optimize;
 
     private String memo;
 

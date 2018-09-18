@@ -6,6 +6,8 @@ package com.seagull.beedo.web.controller;
 
 import com.seagull.beedo.component.DocumentParseComponent;
 import com.seagull.beedo.model.DocumentParseInfo;
+import com.seagull.beedo.model.ElementParseInfo;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,6 +51,23 @@ public class BeedoDocumentController extends BaseController {
 
         String content = JsoupUtils.getConnect(parseUrl.replace(" ", "")).outerHtml();
         result.setData(content);
+        return result;
+    }
+
+    @GetMapping("/parse/query")
+    public Object getUrlSource(String parseUrl, ElementParseInfo elementParseInfo) {
+        CommonResult<String> result = new CommonResult<>();
+
+        boolean urlValid = UrlMatchUtils.urlValid(parseUrl);
+        if (!urlValid) {
+            retFail(result, "url不合法！");
+        }
+
+
+        Elements elements = JsoupUtils.getElements(JsoupUtils
+                .getConnect(parseUrl.replace(" ", "")), elementParseInfo.getCssQuery());
+
+        result.setData(elements.outerHtml());
         return result;
     }
 
