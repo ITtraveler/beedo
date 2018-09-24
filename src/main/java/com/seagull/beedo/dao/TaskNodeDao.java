@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * @author guosheng.huang
- * @version $id:TaskNodeDao.java, v 0.1 2018年08月13日 21:10 tao.hu Exp $
+ * @version $id:TaskNodeDao.java, v 0.1 2018年08月13日 21:10 guosheng.huang Exp $
  */
 public interface TaskNodeDao  extends JpaRepository<TaskNodeDO, Integer> {
     List<TaskNodeDO> findByTaskParseUid(String taskUid);

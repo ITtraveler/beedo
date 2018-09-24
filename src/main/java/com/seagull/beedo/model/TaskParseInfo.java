@@ -16,7 +16,7 @@ import java.util.List;
  * 任务解析的信息
  *
  * @author guosheng.huang
- * @version $id:TaskParseDO.java, v 0.1 2018年08月11日 20:45 tao.hu Exp $
+ * @version $id:TaskParseDO.java, v 0.1 2018年08月11日 20:45 guosheng.huang Exp $
  */
 @Data
 public class TaskParseInfo {
@@ -32,6 +32,11 @@ public class TaskParseInfo {
      * 任务名
      */
     private String name;
+
+    /**
+     * 任务级别
+     */
+    private int level;
 
     /**
      * 任务执行的cron表达式
@@ -64,6 +69,8 @@ public class TaskParseInfo {
      * 是否需要优化爬虫结果
      */
     private boolean optimize;
+
+
 
     private String memo;
 

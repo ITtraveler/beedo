@@ -10,6 +10,7 @@ import com.seagull.beedo.dao.TaskNodeDao;
 import com.seagull.beedo.dao.TaskParseDao;
 import com.seagull.beedo.dao.dataobject.TaskNodeDO;
 import com.seagull.beedo.dao.dataobject.TaskParseDO;
+import com.seagull.beedo.model.TaskElementInfo;
 import com.seagull.beedo.model.TaskNodeInfo;
 import com.seagull.beedo.model.TaskParseInfo;
 import org.slf4j.Logger;
@@ -23,20 +24,24 @@ import team.seagull.common.base.common.page.Page;
 import team.seagull.common.base.common.page.PageAttribute;
 import team.seagull.common.base.common.page.PageList;
 import team.seagull.common.base.query.QueryBase;
+import team.seagull.common.base.utils.CollectionUtils;
 import team.seagull.common.base.utils.RandomUtils;
 import team.seagull.common.base.utils.StringUtils;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author guosheng.huang
- * @version $id:TaskParseComponent.java, v 0.1 2018年08月13日 21:13 tao.hu Exp $
+ * @version $id:TaskParseComponent.java, v 0.1 2018年08月13日 21:13 guosheng.huang Exp $
  */
 @Component
 public class TaskParseComponent {
@@ -74,7 +79,7 @@ public class TaskParseComponent {
             TaskNodeDO taskNodeDO = new TaskNodeDO();
             taskNodeDO.setDocumentId(taskNodeInfo.getDocumentId());
             taskNodeDO.setTaskParseUid(saveTask.getUid());
-            taskNodeDO.setElementMap(JSON.toJSONString(taskNodeInfo.getElementIds()));
+            taskNodeDO.setElementInfoMap(JSON.toJSONString(taskNodeInfo.getElementInfoMap()));
             taskNodeDao.save(taskNodeDO);
         });
 
@@ -94,14 +99,10 @@ public class TaskParseComponent {
         BeanUtils.copyProperties(taskParseDO, taskParseInfo);
 
         //node
-        List<TaskNodeInfo> taskNodeInfos = new ArrayList<>();
-        taskParseInfo.setParseNodes(taskNodeInfos);
         List<TaskNodeDO> taskNodeDOS = taskNodeDao.findByTaskParseUid(taskParseInfo.getUid());
-        taskNodeDOS.forEach(taskNodeDO -> {
-            TaskNodeInfo taskNodeInfo = new TaskNodeInfo();
-            BeanUtils.copyProperties(taskNodeDO, taskNodeInfo);
-            taskNodeInfo.setElementIds(JSON.parseObject(taskNodeDO.getElementMap(), HashMap.class));
-        });
+        if (!CollectionUtils.isEmpty(taskNodeDOS)) {
+            taskParseInfo.setParseNodes(taskNodeDoToInfo(taskNodeDOS));
+        }
 
         return taskParseInfo;
     }
@@ -126,16 +127,10 @@ public class TaskParseComponent {
             taskParseInfoList.add(taskParseInfo);
 
             //Task对应的所有node
-            List<TaskNodeInfo> taskNodeInfoList = new ArrayList<>();
-            List<TaskNodeDO> taskNodeDOList = taskNodeDao.findByTaskParseUid(taskParseDO.getUid());
-            taskNodeDOList.forEach(taskNodeDO -> {
-                TaskNodeInfo taskNodeInfo = new TaskNodeInfo();
-                BeanUtils.copyProperties(taskNodeDO, taskNodeInfo);
-                taskNodeInfo.setElementIds(JSON.parseObject(taskNodeDO.getElementMap(), HashMap.class));
-                taskNodeInfoList.add(taskNodeInfo);
-            });
-
-            taskParseInfo.setParseNodes(taskNodeInfoList);
+            List<TaskNodeDO> taskNodeDOS = taskNodeDao.findByTaskParseUid(taskParseInfo.getUid());
+            if (!CollectionUtils.isEmpty(taskNodeDOS)) {
+                taskParseInfo.setParseNodes(taskNodeDoToInfo(taskNodeDOS));
+            }
         }
 
         int count = (int) taskParseDao.count();
@@ -174,7 +169,7 @@ public class TaskParseComponent {
             TaskNodeDO taskNodeDO = new TaskNodeDO();
             taskNodeDO.setDocumentId(taskNodeInfo.getDocumentId());
             taskNodeDO.setTaskParseUid(taskParseInfo.getUid());
-            taskNodeDO.setElementMap(JSON.toJSONString(taskNodeInfo.getElementIds()));
+            taskNodeDO.setElementInfoMap(JSON.toJSONString(taskNodeInfo.getElementInfoMap()));
             taskNodeDao.save(taskNodeDO);
         });
         return true;
@@ -207,4 +202,28 @@ public class TaskParseComponent {
         logger.info(MessageFormat.format("删除任务的解析节点数据成功,nodeId:{0}", nodeId));
     }
 
+
+    /**
+     * do -> info
+     *
+     * @param taskNodeDOS
+     * @return taskNodeInfos
+     */
+    private List<TaskNodeInfo> taskNodeDoToInfo(List<TaskNodeDO> taskNodeDOS) {
+        List<TaskNodeInfo> taskNodeInfos = new ArrayList<>();
+        for (TaskNodeDO taskNodeDO : taskNodeDOS) {
+            TaskNodeInfo taskNodeInfo = new TaskNodeInfo();
+            BeanUtils.copyProperties(taskNodeDO, taskNodeInfo);
+            LinkedHashMap<Object, TaskElementInfo> elementInfoMap = JSON.parseObject(taskNodeDO.getElementInfoMap(),
+                    LinkedHashMap.class);
+            //对象变成hashMap转换问题处理
+            for (Map.Entry<Object, TaskElementInfo> entry : elementInfoMap.entrySet()) {
+                elementInfoMap.put(entry.getKey(), JSON.parseObject(JSON.toJSONString(entry.getValue()),
+                        TaskElementInfo.class));
+            }
+            taskNodeInfo.setElementInfoMap(elementInfoMap);
+            taskNodeInfos.add(taskNodeInfo);
+        }
+        return taskNodeInfos;
+    }
 }

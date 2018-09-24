@@ -15,7 +15,7 @@ import javax.persistence.LockModeType;
 
 /**
  * @author guosheng.huang
- * @version $id:TaskParseDao.java, v 0.1 2018年08月12日 12:41 tao.hu Exp $
+ * @version $id:TaskParseDao.java, v 0.1 2018年08月12日 12:41 guosheng.huang Exp $
  */
 
 public interface TaskParseDao extends JpaRepository<TaskParseDO, Integer> {

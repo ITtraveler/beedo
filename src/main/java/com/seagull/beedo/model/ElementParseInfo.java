@@ -11,7 +11,7 @@ import lombok.Data;
 /**
  * 一个Element对应一个document表达式
  * @author guosheng.huang
- * @version $id:ElementParseDO.java, v 0.1 2018年08月11日 20:51 tao.hu Exp $
+ * @version $id:ElementParseDO.java, v 0.1 2018年08月11日 20:51 guosheng.huang Exp $
  */
 @Data
 public class ElementParseInfo {

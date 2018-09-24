@@ -8,7 +8,7 @@ import team.seagull.common.base.utils.StringUtils;
 
 /**
  * @author guosheng.huang
- * @version $id:TaskStatusEnum.java, v 0.1 2018年08月11日 21:16 tao.hu Exp $
+ * @version $id:TaskStatusEnum.java, v 0.1 2018年08月11日 21:16 guosheng.huang Exp $
  */
 public enum TaskStatusEnum {
     INIT("INIT", "初始"),

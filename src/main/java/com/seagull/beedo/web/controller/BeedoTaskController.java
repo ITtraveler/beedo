@@ -25,7 +25,7 @@ import team.seagull.common.base.utils.StringUtils;
 
 /**
  * @author guosheng.huang
- * @version $id:BeedoTaskController.java, v 0.1 2018年08月13日 20:56 tao.hu Exp $
+ * @version $id:BeedoTaskController.java, v 0.1 2018年08月13日 20:56 guosheng.huang Exp $
  */
 @RestController
 @RequestMapping("/task")

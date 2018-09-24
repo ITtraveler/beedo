@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * @author guosheng.huang
- * @version $id:DocumentParseDao.java, v 0.1 2018年08月12日 12:35 tao.hu Exp $
+ * @version $id:DocumentParseDao.java, v 0.1 2018年08月12日 12:35 guosheng.huang Exp $
  */
 public interface ElementParseDao extends JpaRepository<ElementParseDO, Integer> {
 

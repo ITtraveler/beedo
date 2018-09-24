@@ -10,7 +10,7 @@ import team.seagull.common.base.result.CommonResult;
 
 /**
  * @author guosheng.huang
- * @version $id:BaseController.java, v 0.1 2018年08月13日 21:41 tao.hu Exp $
+ * @version $id:BaseController.java, v 0.1 2018年08月13日 21:41 guosheng.huang Exp $
  */
 public class BaseController {
     protected void retSuccess(CommonResult result) {

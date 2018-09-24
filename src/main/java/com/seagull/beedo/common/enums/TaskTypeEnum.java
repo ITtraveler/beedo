@@ -2,32 +2,27 @@ package com.seagull.beedo.common.enums;
 
 import team.seagull.common.base.utils.StringUtils;
 
+public enum TaskTypeEnum {
+    INIT("INIT", "初始"),
 
-public enum ParseDataTypeEnum {
-    TEXT("TEXT", "文本"),
+    VALID("VALID", "有效"),
 
-    HTML("HTML", "HTML"),
-
-    ATTR("ATTR", "属性"),
-
-    URL("URL", "链接");
+    CLOSE("CLOSE", "关闭");
 
     String code;
     String message;
 
-
-    ParseDataTypeEnum(String code, String message) {
-
+    TaskTypeEnum(String code, String message) {
         this.code = code;
         this.message = message;
     }
 
-    public static ParseDataTypeEnum codeOf(String code) {
-        if (StringUtils.isBlank(code)){
+    public static TaskTypeEnum codeOf(String code) {
+        if (StringUtils.isBlank(code)) {
             return null;
         }
 
-        for (ParseDataTypeEnum enumObj : ParseDataTypeEnum.values()) {
+        for (TaskTypeEnum enumObj : TaskTypeEnum.values()) {
             if (enumObj.code.equals(code.toUpperCase())) {
                 return enumObj;
             }

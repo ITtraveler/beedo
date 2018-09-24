@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author guosheng.huang
- * @version $id:SQLiteMetadataBuilderInitializer.java, v 0.1 2018年08月12日 19:11 tao.hu Exp $
+ * @version $id:SQLiteMetadataBuilderInitializer.java, v 0.1 2018年08月12日 19:11 guosheng.huang Exp $
  */
 public class SQLiteMetadataBuilderInitializer  extends IdentityColumnSupportImpl {
 

@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * @author guosheng.huang
- * @version $id:DocumentParseDaoImpl.java, v 0.1 2018年08月12日 12:45 tao.hu Exp $
+ * @version $id:DocumentParseDaoImpl.java, v 0.1 2018年08月12日 12:45 guosheng.huang Exp $
  */
 
 public class DocumentParseDaoImpl  {

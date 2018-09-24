@@ -17,7 +17,7 @@ import team.seagull.common.base.query.QueryBase;
  * 任务总执行器，每30s触发一次，redis记录各个ParseTask执行状态
  *
  * @author guosheng.huang
- * @version $id:TaskExecuteComponent.java, v 0.1 2018年08月11日 21:23 tao.hu Exp $
+ * @version $id:TaskExecuteComponent.java, v 0.1 2018年08月11日 21:23 guosheng.huang Exp $
  */
 @Component
 public class ParseTask extends BaseTask {

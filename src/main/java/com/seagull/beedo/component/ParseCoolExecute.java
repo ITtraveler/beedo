@@ -4,13 +4,17 @@
  */
 package com.seagull.beedo.component;
 
+import com.seagull.beedo.common.enums.ParseDataTypeEnum;
+import com.seagull.beedo.common.enums.ParseStructureTypeEnum;
 import com.seagull.beedo.common.enums.TaskStatusEnum;
 import com.seagull.beedo.common.utils.OptimizeUtils;
 import com.seagull.beedo.dao.mongodb.OptMongo;
 import com.seagull.beedo.model.DocumentParseInfo;
 import com.seagull.beedo.model.ElementParseInfo;
+import com.seagull.beedo.model.TaskElementInfo;
 import com.seagull.beedo.model.TaskNodeInfo;
 import com.seagull.beedo.model.TaskParseInfo;
+import com.sun.jmx.snmp.SnmpDataTypeEnums;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +24,12 @@ import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 import team.seagull.common.base.utils.CollectionUtils;
 import team.seagull.common.base.utils.JsoupUtilSingleton;
+import team.seagull.common.base.utils.JsoupUtils;
 import team.seagull.common.base.utils.RandomUtils;
 import team.seagull.common.base.utils.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -32,7 +38,7 @@ import java.util.Map;
 
 /**
  * @author guosheng.huang
- * @version $id:ParseCoolExecute.java, v 0.1 2018年08月12日 11:12 tao.hu Exp $
+ * @version $id:ParseCoolExecute.java, v 0.1 2018年08月12日 11:12 guosheng.huang Exp $
  */
 @Component
 public class ParseCoolExecute {
@@ -45,6 +51,9 @@ public class ParseCoolExecute {
 
     @Autowired
     private DocumentParseComponent documentParseComponent;
+
+    @Autowired
+    private TaskParseComponent taskParseComponent;
 
     @Autowired
     private OptMongo optMongo;
@@ -84,43 +93,15 @@ public class ParseCoolExecute {
 
                     scheduler.setPoolSize(taskParseInfo.getThreadCoolSize());
                     scheduler.schedule(() -> {
-                        Map<Object, Object> data = new LinkedHashMap<>();
-                        List<TaskNodeInfo> parseNodes = taskParseInfo.getParseNodes();
 
-                        if (CollectionUtils.isEmpty(parseNodes)) {
-                            return;
+                        //进行解析
+                        List<Map<Object, Object>> parseResult = parse(taskParseInfo, null);
+
+                        // 将解析到的数据保存到mongodb
+                        for (Map data : parseResult) {
+                            optMongo.insert(data, taskParseInfo.getCollectionName());
+                            System.out.println(data);
                         }
-
-                        parseNodes.forEach(taskNodeInfo -> {
-                            DocumentParseInfo documentParseInfo =
-                                    documentParseComponent.getDocumentById(taskNodeInfo.getDocumentId());
-                            if (documentParseInfo == null) {
-                                logger.error("未找到解析信息，数据异常，请处理documentId:{}", taskNodeInfo.getDocumentId());
-                            }
-
-                            String url = documentParseInfo.getProtocol() + documentParseInfo.getUrl();
-                            Map<Object, String> elementIdMap = taskNodeInfo.getElementIds();
-                            for (Map.Entry entry : elementIdMap.entrySet()) {
-
-                                if (entry.getValue() == null) {
-                                    continue;
-                                }
-
-                                ElementParseInfo elementParseInfo =
-                                        documentParseComponent.getElementById(Integer.valueOf(entry.getKey().toString()));
-                                Object parseResult = getParseResult(url, elementParseInfo);
-
-                                //进行解析结果优化
-                                //if (taskParseInfo.isOptimize()) {
-                                parseResult = optimize(parseResult, documentParseInfo, taskParseInfo, elementParseInfo);
-                                // }
-
-                                data.put(entry.getValue(), parseResult);
-                            }
-                        });
-                        // TODO: 2018/8/11 将获取到的data保存到mongodb
-                        optMongo.insert(data, taskParseInfo.getCollectionName());
-                        System.out.println(data);
                     }, triggerContext -> {
                         String cron = taskParseInfo.getCron();
 
@@ -137,6 +118,126 @@ public class ParseCoolExecute {
                     });
                 }
         );
+    }
+
+    private List<Map<Object, Object>> parse(TaskParseInfo taskParseInfo, String url) {
+        List<Map<Object, Object>> resultData = new ArrayList<>();
+        List<TaskNodeInfo> parseNodes = taskParseInfo.getParseNodes();
+        if (CollectionUtils.isEmpty(parseNodes)) {
+            return resultData;
+        }
+
+
+        //需要进行展开的数组数据长度
+        Integer maxLenght = 0;
+
+        //需要展开的数据
+        Map<Object, List> expandDataMap = new LinkedHashMap<>();
+
+        Map<Object, Object> data = new LinkedHashMap<>();
+        resultData.add(data);
+
+        for (TaskNodeInfo taskNodeInfo : parseNodes) {
+
+            //获取该节点的Document信息
+            DocumentParseInfo documentParseInfo = documentParseComponent.getDocumentById(taskNodeInfo.getDocumentId());
+            if (documentParseInfo == null) {
+                logger.error("未找到解析信息，数据异常，请处理documentId:{}", taskNodeInfo.getDocumentId());
+                continue;
+            }
+
+            //该节点所解析的url,为父类直接用自身的url
+            if (taskParseInfo.getLevel() == 0) {
+                url = documentParseInfo.getProtocol() + documentParseInfo.getUrl();
+            }
+
+            //该节点要解析的目标内容（一个Document可能配置了多个Element，即可能配置多个）
+            Map<Object, TaskElementInfo> elementIdMap = taskNodeInfo.getElementInfoMap();
+            for (Map.Entry entry : elementIdMap.entrySet()) {
+                Integer elementId = Integer.valueOf(entry.getKey().toString());
+                //具体解析的元素
+                ElementParseInfo elementParseInfo =
+                        documentParseComponent.getElementById(elementId);
+                if (elementParseInfo == null) {
+                    logger.error("未找到解析信息，数据异常，请处理element:{}", elementId);
+                    continue;
+                }
+
+                //元素解析结果
+                Object parseResult = getParseResult(url, elementParseInfo);
+
+                TaskElementInfo taskElementInfo = (TaskElementInfo) entry.getValue();
+                if (taskElementInfo == null) {
+                    logger.error("任务元素信息不存在，数据异常，请处理element:{}", elementId);
+                    continue;
+                }
+
+
+                //优化解析的结果 有//问题
+                parseResult = optimize(parseResult, documentParseInfo, taskParseInfo, elementParseInfo);
+
+                if (ParseStructureTypeEnum.ARRAY == elementParseInfo.getStructureType()
+                        && taskElementInfo.getExpand()) {
+                    int size = ((List) parseResult).size();
+                    if (size > maxLenght) {
+                        maxLenght = size;
+                    }
+                }
+
+                //todo 考虑移到dealParseData中
+                if (ParseDataTypeEnum.URL == elementParseInfo.getDataType()
+                        && StringUtils.isNotBlank(taskElementInfo.getSubTaskUid())) {
+                    TaskParseInfo subTaskParseInfo = taskParseComponent.getTaskByUid(taskElementInfo.getSubTaskUid());
+                    if (ParseStructureTypeEnum.ARRAY == elementParseInfo.getStructureType()) {
+                        for (String subUrl : (List<String>) parseResult) {
+                           // parse(subTaskParseInfo, subUrl);
+                        }
+                    } else {
+                        //todo 设置子项的url
+                        data.put("subData", parse(subTaskParseInfo, parseResult.toString()));
+                    }
+
+                }
+
+                if (ParseStructureTypeEnum.ARRAY == elementParseInfo.getStructureType()
+                        && taskElementInfo.getExpand()) {
+                    expandDataMap.put(taskElementInfo.getField(), (List) parseResult);
+                } else {
+                    data.put(taskElementInfo.getField(), parseResult);
+                }
+            }
+        }
+
+        if (maxLenght > 0) {
+            resultData = dealParseData(data, expandDataMap, maxLenght);
+        }
+
+        return resultData;
+    }
+
+    /**
+     * 处理解析的数据，进行展开处理
+     *
+     * @param data
+     * @param expandDataMap
+     * @param maxLenght
+     * @return
+     */
+    private List<Map<Object, Object>> dealParseData(Map<Object, Object> data,
+                                                    Map<Object, List> expandDataMap, Integer maxLenght) {
+        List<Map<Object, Object>> resultData = new ArrayList<>();
+
+        for (int i = 0; i < maxLenght; i++) {
+            Map<Object, Object> copyData = new LinkedHashMap<>(data);
+            for (Map.Entry entry : expandDataMap.entrySet()) {
+                List list = (List) entry.getValue();
+                int index = list.size() - i % list.size() - 1;
+                copyData.put(entry.getKey(), list.get(index));
+            }
+            resultData.add(copyData);
+        }
+        return resultData;
+
     }
 
     /**
@@ -159,6 +260,14 @@ public class ParseCoolExecute {
                         result = jsoupUtilSingleton.getAttr(url, elementParseInfo.getCssQuery(), elementParseInfo
                                 .getAttr());
                         break;
+                    case URL:
+                        if (StringUtils.isNotBlank(elementParseInfo.getAttr())) {
+                            result = jsoupUtilSingleton.getAttr(url, elementParseInfo.getCssQuery(), elementParseInfo
+                                    .getAttr());
+                        } else {
+                            result = jsoupUtilSingleton.getText(url, elementParseInfo.getCssQuery());
+                        }
+                        break;
                     case HTML:
                         result = jsoupUtilSingleton.getHtml(url, elementParseInfo.getCssQuery());
                         break;
@@ -172,6 +281,14 @@ public class ParseCoolExecute {
                     case ATTR:
                         result = jsoupUtilSingleton.getAttrList(url, elementParseInfo.getCssQuery(), elementParseInfo
                                 .getAttr());
+                        break;
+                    case URL:
+                        if (StringUtils.isNotBlank(elementParseInfo.getAttr())) {
+                            result = jsoupUtilSingleton.getAttrList(url, elementParseInfo.getCssQuery(), elementParseInfo
+                                    .getAttr());
+                        } else {
+                            result = jsoupUtilSingleton.getTextList(url, elementParseInfo.getCssQuery());
+                        }
                         break;
                     case HTML:
                         result = jsoupUtilSingleton.getHtmlList(url, elementParseInfo.getCssQuery());
@@ -190,7 +307,7 @@ public class ParseCoolExecute {
                 List<String> list = new ArrayList<>();
                 for (String str : (List<String>) obj) {
                     // str = str.replace();
-                    if ("href".equals(elementParseInfo.getAttr())) {
+                    if (ParseDataTypeEnum.URL == elementParseInfo.getDataType()) {
                         str = OptimizeUtils.getVaildUrl(baseUrl, str);
                     }
                     list.add(str);
@@ -198,7 +315,7 @@ public class ParseCoolExecute {
                 obj = list;
                 break;
             case STRING:
-                if ("href".equals(elementParseInfo.getAttr())) {
+                if (ParseDataTypeEnum.URL == elementParseInfo.getDataType()) {
                     obj = OptimizeUtils.getVaildUrl(baseUrl, (String) obj);
                 }
                 break;

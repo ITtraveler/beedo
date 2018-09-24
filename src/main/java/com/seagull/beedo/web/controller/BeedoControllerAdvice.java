@@ -13,7 +13,7 @@ import team.seagull.common.base.result.CommonResult;
 /**
  * ControllerAdvice
  * @author guosheng.huang
- * @version $id:BeedoControllerAdvice.java, v 0.1 2018年08月11日 20:45 tao.hu Exp $
+ * @version $id:BeedoControllerAdvice.java, v 0.1 2018年08月11日 20:45 guosheng.huang Exp $
  */
 @ControllerAdvice
 public class BeedoControllerAdvice{

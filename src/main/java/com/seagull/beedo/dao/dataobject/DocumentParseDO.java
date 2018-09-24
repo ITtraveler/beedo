@@ -22,7 +22,7 @@ import java.util.Date;
 /**
  * 一个页面为一个Document，一个Document下有多个Element
  * @author guosheng.huang
- * @version $id:DocumentParseDO.java, v 0.1 2018年08月11日 20:51 tao.hu Exp $
+ * @version $id:DocumentParseDO.java, v 0.1 2018年08月11日 20:51 guosheng.huang Exp $
  */
 @Entity
 @Table(name = "beedo_document")

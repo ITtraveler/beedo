@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * @author guosheng.huang
- * @version $id:ElementParseDaoImpl.java, v 0.1 2018年08月12日 15:49 tao.hu Exp $
+ * @version $id:ElementParseDaoImpl.java, v 0.1 2018年08月12日 15:49 guosheng.huang Exp $
  */
 
 public class ElementParseDaoImpl {

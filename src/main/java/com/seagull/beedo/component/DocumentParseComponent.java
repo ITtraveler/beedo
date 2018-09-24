@@ -31,7 +31,7 @@ import java.util.Optional;
 
 /**
  * @author guosheng.huang
- * @version $id:DocumentParseComponent.java, v 0.1 2018年08月12日 13:00 tao.hu Exp $
+ * @version $id:DocumentParseComponent.java, v 0.1 2018年08月12日 13:00 guosheng.huang Exp $
  */
 @Component
 public class DocumentParseComponent {

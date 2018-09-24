@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 
 /**
  * @author guosheng.huang
- * @version $id:DocumentParseDao.java, v 0.1 2018年08月12日 12:35 tao.hu Exp $
+ * @version $id:DocumentParseDao.java, v 0.1 2018年08月12日 12:35 guosheng.huang Exp $
  */
 public interface DocumentParseDao extends JpaRepository<DocumentParseDO, Integer> {
 

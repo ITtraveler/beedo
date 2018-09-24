@@ -8,7 +8,7 @@ import org.hibernate.dialect.identity.IdentityColumnSupportImpl;
 
 /**
  * @author guosheng.huang
- * @version $id:SQLiteDialectIdentityColumnSupport.java, v 0.1 2018年08月12日 19:11 tao.hu Exp $
+ * @version $id:SQLiteDialectIdentityColumnSupport.java, v 0.1 2018年08月12日 19:11 guosheng.huang Exp $
  */
 public class SQLiteDialectIdentityColumnSupport extends IdentityColumnSupportImpl {
 

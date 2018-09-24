@@ -36,7 +36,7 @@ import java.sql.Types;
 
 /**
  * @author guosheng.huang
- * @version $id:SQLiteDialect.java, v 0.1 2018年08月12日 16:35 tao.hu Exp $
+ * @version $id:SQLiteDialect.java, v 0.1 2018年08月12日 16:35 guosheng.huang Exp $
  */
 
 public class SQLiteDialect extends Dialect {

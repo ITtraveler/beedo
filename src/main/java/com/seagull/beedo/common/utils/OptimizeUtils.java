@@ -13,8 +13,8 @@ public class OptimizeUtils {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
 
-        if (baseUrl.indexOf("/") == 0) {
-            baseUrl = baseUrl.substring(1);
+        if (url.indexOf("/") == 0) {
+            url = url.substring(1);
         }
         return baseUrl + "/" + url;
     }

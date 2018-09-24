@@ -20,7 +20,7 @@ import java.util.Date;
  * 任务解析的信息
  *
  * @author guosheng.huang
- * @version $id:TaskParseDO.java, v 0.1 2018年08月11日 20:45 tao.hu Exp $
+ * @version $id:TaskParseDO.java, v 0.1 2018年08月11日 20:45 guosheng.huang Exp $
  */
 @Entity
 @Table(name = "beedo_task_parse")
@@ -45,6 +45,12 @@ public class TaskParseDO {
      */
     @Column(length = 32)
     private String name;
+
+    /**
+     * 任务级别
+     */
+    @Column(length = 4, columnDefinition = "0", nullable = false)
+    private Integer level;
 
     /**
      * 任务执行的cron表达式
@@ -75,8 +81,8 @@ public class TaskParseDO {
     /**
      * 是否需要优化爬虫结果
      */
-   // @Column(columnDefinition = "char(1)")
-   // private Character optimize;
+    // @Column(columnDefinition = "char(1)")
+    // private Character optimize;
 
     /**
      * memo
