@@ -122,9 +122,9 @@ public class BeedoDocumentController extends BaseController {
     @GetMapping("/page/{page}/size/{size}")
     public Object getParseDocuments(@PathVariable int page, @PathVariable int size) {
         PageListResult<DocumentParseInfo> result = new PageListResult<>();
-        PageList<DocumentParseInfo> documentParseList = documentParseComponent.getDocumentPage(new QueryBase(page,
+        PageList<DocumentParseInfo> documentPage = documentParseComponent.getDocumentPage(new QueryBase(page,
                 size));
-        PageQueryResultConvert.converToResult(result, documentParseList);
+        PageQueryResultConvert.converToResult(result, documentPage);
         result.setCurrentPage(page);
         return result;
     }

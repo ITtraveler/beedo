@@ -22,7 +22,10 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     username: root
     password:
-
+  cache:
+    ehcache:
+      config: classpath:ehcache.xml
+    type: ehcache
 
 management:
   endpoints:
@@ -40,4 +43,3 @@ info:
   application: beedo
   author: huangguosheng
   email: 290529123@qq.com
-

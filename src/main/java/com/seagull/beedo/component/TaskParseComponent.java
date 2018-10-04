@@ -6,6 +6,7 @@ package com.seagull.beedo.component;
 
 import com.alibaba.fastjson.JSON;
 import com.seagull.beedo.common.enums.TaskStatusEnum;
+import com.seagull.beedo.common.query.TaskQuery;
 import com.seagull.beedo.dao.TaskNodeDao;
 import com.seagull.beedo.dao.TaskParseDao;
 import com.seagull.beedo.dao.dataobject.TaskNodeDO;
@@ -17,29 +18,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import team.seagull.common.base.common.page.Page;
 import team.seagull.common.base.common.page.PageAttribute;
 import team.seagull.common.base.common.page.PageList;
-import team.seagull.common.base.query.QueryBase;
 import team.seagull.common.base.utils.CollectionUtils;
 import team.seagull.common.base.utils.RandomUtils;
 import team.seagull.common.base.utils.StringUtils;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 /**
+ * 任务解析组件
+ *
  * @author guosheng.huang
  * @version $id:TaskParseComponent.java, v 0.1 2018年08月13日 21:13 guosheng.huang Exp $
  */
@@ -92,6 +92,7 @@ public class TaskParseComponent {
      * @param uid
      * @return
      */
+    @Cacheable(value = "taskParseInfo",key = "#uid")
     public TaskParseInfo getTaskByUid(String uid) {
         TaskParseInfo taskParseInfo = new TaskParseInfo();
         //Task
@@ -110,12 +111,15 @@ public class TaskParseComponent {
     /**
      * 分页获取Task
      *
-     * @param queryBase
+     * @param query
      * @return
      */
-    public PageList<TaskParseInfo> getTaskPage(QueryBase queryBase) {
+    public PageList<TaskParseInfo> getTaskPage(TaskQuery query) {
+        TaskParseDO parseDO = new TaskParseDO();
+        parseDO.setTaskStatus(query.getTaskStatus());
+        Example<TaskParseDO> example = Example.of(parseDO);
         org.springframework.data.domain.Page<TaskParseDO> TaskParsePage = taskParseDao.findAll
-                (PageRequest.of(queryBase.pageNum - 1, queryBase.getPageSize()));
+                (example, PageRequest.of(query.pageNum - 1, query.getPageSize()));
         Iterator<TaskParseDO> iterator = TaskParsePage.iterator();
         ArrayList<TaskParseInfo> taskParseInfoList = new ArrayList<>();
 
@@ -134,7 +138,7 @@ public class TaskParseComponent {
         }
 
         int count = (int) taskParseDao.count();
-        Page page = Page.getInstance(new PageAttribute(queryBase.getPageNum(), queryBase.getPageSize()), count);
+        Page page = Page.getInstance(new PageAttribute(query.getPageNum(), query.getPageSize()), count);
         PageList<TaskParseInfo> pageList = PageList.getInstance(
                 taskParseInfoList, page);
         return pageList;

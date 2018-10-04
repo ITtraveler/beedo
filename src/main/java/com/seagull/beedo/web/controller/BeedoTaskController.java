@@ -5,6 +5,7 @@
 package com.seagull.beedo.web.controller;
 
 import com.seagull.beedo.common.enums.TaskStatusEnum;
+import com.seagull.beedo.common.query.TaskQuery;
 import com.seagull.beedo.component.TaskParseComponent;
 import com.seagull.beedo.model.TaskParseInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,7 @@ public class BeedoTaskController extends BaseController {
     @GetMapping("/page/{page}/size/{size}")
     public Object getParseTasks(@PathVariable int page, @PathVariable int size) {
         PageListResult<TaskParseInfo> result = new PageListResult<>();
-        PageList<TaskParseInfo> pageList = taskParseComponent.getTaskPage(new QueryBase(page,
+        PageList<TaskParseInfo> pageList = taskParseComponent.getTaskPage(new TaskQuery(page,
                 size));
         PageQueryResultConvert.converToResult(result, pageList);
         result.setCurrentPage(page);

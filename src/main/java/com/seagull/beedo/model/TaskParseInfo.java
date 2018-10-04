@@ -9,6 +9,7 @@ import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -19,7 +20,7 @@ import java.util.List;
  * @version $id:TaskParseDO.java, v 0.1 2018年08月11日 20:45 guosheng.huang Exp $
  */
 @Data
-public class TaskParseInfo {
+public class TaskParseInfo{
 
     private Integer id;
 

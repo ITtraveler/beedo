@@ -117,32 +117,32 @@ public class DocumentParseComponent {
         org.springframework.data.domain.Page<DocumentParseDO> documentParsePage = documentParseDao.findAll
                 (PageRequest.of(queryBase.pageNum - 1, queryBase.getPageSize()));
         Iterator<DocumentParseDO> iterator = documentParsePage.iterator();
-        ArrayList<DocumentParseInfo> documentParseInfoList = new ArrayList<>();
+        ArrayList<DocumentParseInfo> documentParseInfos = new ArrayList<>();
 
         //转换处理
         while (iterator.hasNext()) {
             DocumentParseDO documentParseDO = iterator.next();
             DocumentParseInfo documentParseInfo = new DocumentParseInfo();
             BeanUtils.copyProperties(documentParseDO, documentParseInfo);
-            documentParseInfoList.add(documentParseInfo);
+            documentParseInfos.add(documentParseInfo);
 
             //document对应的所有element
-            List<ElementParseInfo> elementParseInfoList = new ArrayList<>();
-            List<ElementParseDO> elementParseDOList = elementParseDao.findByDocumentIdOrderByGmtCreateDesc
+            List<ElementParseInfo> elementParseInfos = new ArrayList<>();
+            List<ElementParseDO> elementParseDOs = elementParseDao.findByDocumentIdOrderByGmtCreateDesc
                     (documentParseDO.getId());
-            elementParseDOList.forEach(elementParseDO -> {
+            elementParseDOs.forEach(elementParseDO -> {
                 ElementParseInfo elementParseInfo = new ElementParseInfo();
                 BeanUtils.copyProperties(elementParseDO, elementParseInfo);
-                elementParseInfoList.add(elementParseInfo);
+                elementParseInfos.add(elementParseInfo);
             });
 
-            documentParseInfo.setElements(elementParseInfoList);
+            documentParseInfo.setElements(elementParseInfos);
         }
 
         int count = (int) documentParseDao.count();
         Page page = Page.getInstance(new PageAttribute(queryBase.getPageNum(), queryBase.getPageSize()), count);
         PageList<DocumentParseInfo> pageList = PageList.getInstance(
-                documentParseInfoList, page);
+                documentParseInfos, page);
         return pageList;
     }
 

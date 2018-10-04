@@ -6,6 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.index.Index;
+import org.springframework.data.mongodb.core.index.IndexInfo;
+import org.springframework.data.mongodb.core.index.IndexOperations;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
@@ -111,5 +114,19 @@ public class OptMongo {
         }
     }
 
+    /**
+     * 添加索引
+     * @param collectionName
+     * @param index
+     */
+    public void addIndex(String collectionName, Index index){
+        IndexOperations indexOperations = mongoTemplate.indexOps(collectionName);
+        indexOperations.ensureIndex(index);
+    }
+
+    public List<IndexInfo> getAllIndexs(String collectionName){
+        IndexOperations indexOperations = mongoTemplate.indexOps(collectionName);
+        return indexOperations.getIndexInfo();
+    }
 }
 

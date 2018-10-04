@@ -25,6 +25,7 @@
         <corepom.version>0.0.1-SNAPSHOT</corepom.version>
         <base.version>1.0.2-SNAPSHOT</base.version>
         <sqlite-jdbc.version>3.20.0</sqlite-jdbc.version>
+        <ehcache.version>3.6.1</ehcache.version>
     </properties>
 
     <dependencies>
@@ -39,9 +40,22 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>team.seagull.common</groupId>
             <artifactId>base</artifactId>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/net.sf.ehcache/ehcache -->
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>2.10.5</version>
+        </dependency>
+
 
         <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
     <!--    <dependency>
@@ -53,6 +67,8 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
+
+
     </dependencies>
 
     <dependencyManagement>
@@ -68,6 +84,13 @@
                 <groupId>team.seagull.common</groupId>
                 <artifactId>base</artifactId>
                 <version>${base.version}</version>
+            </dependency>
+
+            <!-- https://mvnrepository.com/artifact/org.ehcache/ehcache -->
+            <dependency>
+                <groupId>org.ehcache</groupId>
+                <artifactId>ehcache</artifactId>
+                <version>${ehcache.version}</version>
             </dependency>
 
             <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->

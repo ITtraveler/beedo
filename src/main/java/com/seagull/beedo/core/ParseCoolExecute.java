@@ -2,30 +2,28 @@
  * beedo.com Inc.
  * Copyright (c) 2018- All Rights Reserved.
  */
-package com.seagull.beedo.component;
+package com.seagull.beedo.core;
 
 import com.seagull.beedo.common.enums.ParseDataTypeEnum;
 import com.seagull.beedo.common.enums.ParseStructureTypeEnum;
 import com.seagull.beedo.common.enums.TaskStatusEnum;
 import com.seagull.beedo.common.utils.OptimizeUtils;
-import com.seagull.beedo.dao.mongodb.OptMongo;
+import com.seagull.beedo.component.DocumentParseComponent;
+import com.seagull.beedo.component.ParseDataComponent;
+import com.seagull.beedo.component.TaskParseComponent;
 import com.seagull.beedo.model.DocumentParseInfo;
 import com.seagull.beedo.model.ElementParseInfo;
 import com.seagull.beedo.model.TaskElementInfo;
 import com.seagull.beedo.model.TaskNodeInfo;
 import com.seagull.beedo.model.TaskParseInfo;
-import com.sun.jmx.snmp.SnmpDataTypeEnums;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 import team.seagull.common.base.utils.CollectionUtils;
 import team.seagull.common.base.utils.JsoupUtilSingleton;
-import team.seagull.common.base.utils.JsoupUtils;
-import team.seagull.common.base.utils.RandomUtils;
 import team.seagull.common.base.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -35,6 +33,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author guosheng.huang
@@ -47,6 +46,9 @@ public class ParseCoolExecute {
      */
     Logger logger = LoggerFactory.getLogger(ParseCoolExecute.class);
 
+    /**
+     * 暂存区
+     */
     private Map<String, Object> schedulerMap = new HashMap<>();
 
     @Autowired
@@ -56,18 +58,16 @@ public class ParseCoolExecute {
     private TaskParseComponent taskParseComponent;
 
     @Autowired
-    private OptMongo optMongo;
+    private ParseDataComponent dataComponent;
 
-    public void parseCool(List<TaskParseInfo> taskInfoList) {
-
+    public void parseCool(List<TaskParseInfo> parseInfos) {
         //任务执行
-        taskInfoList.forEach(taskParseInfo -> {
+        parseInfos.forEach(taskParseInfo -> {
                     //不为有效状态->下一个
                     if (TaskStatusEnum.INIT == taskParseInfo.getTaskStatus()) {
                         return;
                     }
 
-                    // TODO: 2018/8/11 将改成任务定时保存再redis中防止，防止多次创建，key：taskParseInfo.id
                     ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) schedulerMap.get(taskParseInfo
                             .getUid());
 
@@ -78,7 +78,9 @@ public class ParseCoolExecute {
                             scheduler.initialize();
                             scheduler.setThreadGroupName(taskParseInfo.getUid());
                             schedulerMap.put(taskParseInfo.getUid(), scheduler);
-                        } else {
+                        } else if (taskParseInfo.getTaskStatus() == TaskStatusEnum.CLOSE) {
+                            //更新状态为INIT
+                            taskParseComponent.updateTaskStatus(taskParseInfo.getUid(), TaskStatusEnum.INIT);
                             return;
                         }
                     }
@@ -88,6 +90,8 @@ public class ParseCoolExecute {
                         scheduler.shutdown();
                         schedulerMap.remove(taskParseInfo.getId());
                         logger.info("关闭定时任务，taskParseInfo：{}", taskParseInfo);
+                        //更新状态为INIT
+                        taskParseComponent.updateTaskStatus(taskParseInfo.getUid(), TaskStatusEnum.INIT);
                         return;
                     }
 
@@ -97,9 +101,11 @@ public class ParseCoolExecute {
                         //进行解析
                         List<Map<Object, Object>> parseResult = parse(taskParseInfo, null);
 
-                        // 将解析到的数据保存到mongodb
+                        // TODO: 2018/9/26 动态索引设置
+                        // 将解析到的数据保存到mongodb及设置索引
                         for (Map data : parseResult) {
-                            optMongo.insert(data, taskParseInfo.getCollectionName());
+                            dataComponent.saveData(data, taskParseInfo.getCollectionName(),
+                                    Arrays.asList("title"));
                             System.out.println(data);
                         }
                     }, triggerContext -> {
@@ -128,11 +134,11 @@ public class ParseCoolExecute {
         }
 
 
-        //需要进行展开的数组数据长度
-        Integer maxLenght = 0;
+        //需要进行展开的数组数据最长长度
+        Integer maxLength = 0;
 
         //需要展开的数据
-        Map<Object, List> expandDataMap = new LinkedHashMap<>();
+        Map<Object, Map<String, Object>> expandDataMap = new LinkedHashMap<>();
 
         Map<Object, Object> data = new LinkedHashMap<>();
         resultData.add(data);
@@ -172,45 +178,42 @@ public class ParseCoolExecute {
                     continue;
                 }
 
-
-                //优化解析的结果 有//问题
+                //优化结果
                 parseResult = optimize(parseResult, documentParseInfo, taskParseInfo, elementParseInfo);
 
                 if (ParseStructureTypeEnum.ARRAY == elementParseInfo.getStructureType()
                         && taskElementInfo.getExpand()) {
                     int size = ((List) parseResult).size();
-                    if (size > maxLenght) {
-                        maxLenght = size;
+                    if (size > maxLength) {
+                        maxLength = size;
                     }
                 }
 
                 //todo 考虑移到dealParseData中
-                if (ParseDataTypeEnum.URL == elementParseInfo.getDataType()
-                        && StringUtils.isNotBlank(taskElementInfo.getSubTaskUid())) {
-                    TaskParseInfo subTaskParseInfo = taskParseComponent.getTaskByUid(taskElementInfo.getSubTaskUid());
-                    if (ParseStructureTypeEnum.ARRAY == elementParseInfo.getStructureType()) {
-                        for (String subUrl : (List<String>) parseResult) {
-                           // parse(subTaskParseInfo, subUrl);
-                        }
-                    } else {
+                if (ParseStructureTypeEnum.ARRAY == elementParseInfo.getStructureType()
+                        && taskElementInfo.getExpand()) {
+                    Map<String, Object> valueMap = new HashMap<>();
+                    valueMap.put("subTaskUid", taskElementInfo.getSubTaskUid());
+                    valueMap.put("expandData", parseResult);
+                    expandDataMap.put(taskElementInfo.getField(), valueMap);
+                } else {
+                    data.put(taskElementInfo.getField(), parseResult);
+                    if (ParseDataTypeEnum.URL == elementParseInfo.getDataType()
+                            && StringUtils.isNotBlank(taskElementInfo.getSubTaskUid())) {
+                        TaskParseInfo subTaskParseInfo = taskParseComponent.getTaskByUid(taskElementInfo.getSubTaskUid());
                         //todo 设置子项的url
                         data.put("subData", parse(subTaskParseInfo, parseResult.toString()));
                     }
-
-                }
-
-                if (ParseStructureTypeEnum.ARRAY == elementParseInfo.getStructureType()
-                        && taskElementInfo.getExpand()) {
-                    expandDataMap.put(taskElementInfo.getField(), (List) parseResult);
-                } else {
-                    data.put(taskElementInfo.getField(), parseResult);
                 }
             }
         }
 
-        if (maxLenght > 0) {
-            resultData = dealParseData(data, expandDataMap, maxLenght);
+
+        if (maxLength > 0) {
+            resultData = dealParseData(data, expandDataMap, maxLength);
         }
+
+        //处理子项
 
         return resultData;
     }
@@ -218,21 +221,33 @@ public class ParseCoolExecute {
     /**
      * 处理解析的数据，进行展开处理
      *
-     * @param data
-     * @param expandDataMap
-     * @param maxLenght
+     * @param data          单条数据
+     * @param expandDataMap 需要展开的数据
+     * @param maxLength     需要展开的数组最长长度
      * @return
      */
     private List<Map<Object, Object>> dealParseData(Map<Object, Object> data,
-                                                    Map<Object, List> expandDataMap, Integer maxLenght) {
+                                                    Map<Object, Map<String, Object>> expandDataMap, Integer maxLength) {
         List<Map<Object, Object>> resultData = new ArrayList<>();
 
-        for (int i = 0; i < maxLenght; i++) {
+        for (int i = 0; i < maxLength; i++) {
             Map<Object, Object> copyData = new LinkedHashMap<>(data);
             for (Map.Entry entry : expandDataMap.entrySet()) {
-                List list = (List) entry.getValue();
-                int index = list.size() - i % list.size() - 1;
-                copyData.put(entry.getKey(), list.get(index));
+                Map valueMap = (Map) entry.getValue();
+
+                //拓展的数据
+                List expandData = (List) valueMap.get("expandData");
+                int index = expandData.size() - i % expandData.size() - 1;
+                copyData.put(entry.getKey(), expandData.get(index));
+
+                //子项数据
+                Object subTaskUid = valueMap.get("subTaskUid");
+                if (subTaskUid != null) {
+                    //有缓存处理
+                    TaskParseInfo subTaskParseInfo = taskParseComponent.getTaskByUid(subTaskUid.toString());
+                    copyData.put("subData", parse(subTaskParseInfo, expandData.get(index).toString()));
+                }
+
             }
             resultData.add(copyData);
         }
