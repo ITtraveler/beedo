@@ -9,8 +9,8 @@ import com.seagull.beedo.common.enums.TaskStatusEnum;
 import com.seagull.beedo.common.query.TaskQuery;
 import com.seagull.beedo.dao.TaskNodeDao;
 import com.seagull.beedo.dao.TaskParseDao;
-import com.seagull.beedo.dao.dataobject.TaskNodeDO;
-import com.seagull.beedo.dao.dataobject.TaskParseDO;
+import com.seagull.beedo.dao.domain.TaskNodeDO;
+import com.seagull.beedo.dao.domain.TaskParseDO;
 import com.seagull.beedo.model.TaskElementInfo;
 import com.seagull.beedo.model.TaskNodeInfo;
 import com.seagull.beedo.model.TaskParseInfo;
@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.PageRequest;
@@ -92,7 +94,7 @@ public class TaskParseComponent {
      * @param uid
      * @return
      */
-    @Cacheable(value = "taskParseInfo",key = "#uid")
+    @Cacheable(value = "taskParseInfo", key = "#uid")
     public TaskParseInfo getTaskByUid(String uid) {
         TaskParseInfo taskParseInfo = new TaskParseInfo();
         //Task
@@ -144,6 +146,14 @@ public class TaskParseComponent {
         return pageList;
     }
 
+    /**
+     * 更新操作直接从缓存删除即可，不做@CachePut
+     *
+     * @param taskParseInfo
+     * @return
+     */
+    @CacheEvict(value = "taskParseInfo", key = "#taskParseInfo.uid",
+            condition = "#taskParseInfo.uid != null")
     @Transactional
     public boolean updateTask(TaskParseInfo taskParseInfo) {
         if (taskParseInfo.getId() == null || taskParseInfo.getId() <= 0) {
@@ -179,6 +189,8 @@ public class TaskParseComponent {
         return true;
     }
 
+
+    @CacheEvict(value = "taskParseInfo", key = "#uid", condition = "#uid != null")
     @Transactional
     public boolean updateTaskStatus(String uid, TaskStatusEnum statusEnum) {
         if (statusEnum == null) {

@@ -29,6 +29,11 @@ public class TaskElementInfo {
     private String subTaskUid;
 
     /**
+     * 默认值
+     */
+    private String defValue;
+
+    /**
      * 是否需要展开，仅数据结构为数组时才可以数据展开
      */
     private Boolean expand = true;

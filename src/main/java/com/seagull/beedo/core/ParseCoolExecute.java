@@ -88,7 +88,7 @@ public class ParseCoolExecute {
                     //关闭任务
                     if (taskParseInfo.getTaskStatus() == TaskStatusEnum.CLOSE) {
                         scheduler.shutdown();
-                        schedulerMap.remove(taskParseInfo.getId());
+                        schedulerMap.remove(taskParseInfo.getUid());
                         logger.info("关闭定时任务，taskParseInfo：{}", taskParseInfo);
                         //更新状态为INIT
                         taskParseComponent.updateTaskStatus(taskParseInfo.getUid(), TaskStatusEnum.INIT);
@@ -189,7 +189,6 @@ public class ParseCoolExecute {
                     }
                 }
 
-                //todo 考虑移到dealParseData中
                 if (ParseStructureTypeEnum.ARRAY == elementParseInfo.getStructureType()
                         && taskElementInfo.getExpand()) {
                     Map<String, Object> valueMap = new HashMap<>();
@@ -197,12 +196,15 @@ public class ParseCoolExecute {
                     valueMap.put("expandData", parseResult);
                     expandDataMap.put(taskElementInfo.getField(), valueMap);
                 } else {
-                    data.put(taskElementInfo.getField(), parseResult);
+                    //有子任务情况，进行递归获取子任务数据
                     if (ParseDataTypeEnum.URL == elementParseInfo.getDataType()
                             && StringUtils.isNotBlank(taskElementInfo.getSubTaskUid())) {
                         TaskParseInfo subTaskParseInfo = taskParseComponent.getTaskByUid(taskElementInfo.getSubTaskUid());
-                        //todo 设置子项的url
-                        data.put("subData", parse(subTaskParseInfo, parseResult.toString()));
+                        //设置子项的url
+                        data.put(taskElementInfo.getField(), parse(subTaskParseInfo, parseResult.toString()));
+                    } else {
+                        data.put(taskElementInfo.getField(),
+                                parseResult == null ? taskElementInfo.getDefValue() : parseResult);
                     }
                 }
             }
@@ -232,6 +234,8 @@ public class ParseCoolExecute {
 
         for (int i = 0; i < maxLength; i++) {
             Map<Object, Object> copyData = new LinkedHashMap<>(data);
+
+            //需要展开的数据进行展开处理
             for (Map.Entry entry : expandDataMap.entrySet()) {
                 Map valueMap = (Map) entry.getValue();
 

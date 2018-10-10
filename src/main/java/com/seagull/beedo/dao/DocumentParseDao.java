@@ -4,7 +4,7 @@
  */
 package com.seagull.beedo.dao;
 
-import com.seagull.beedo.dao.dataobject.DocumentParseDO;
+import com.seagull.beedo.dao.domain.DocumentParseDO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

@@ -3,13 +3,13 @@ server:
   servlet:
     context-path: /beedo
 spring:
+  application:
+    name: beedo
   data:
     mongodb:
       host: 127.0.0.1
       port: 27017
       database: beedo
-  application:
-    name: beedo
   jpa:
     database-platform: com.seagull.beedo.config.SQLiteDialect
     generate-ddl: true

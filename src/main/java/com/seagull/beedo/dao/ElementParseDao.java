@@ -4,12 +4,8 @@
  */
 package com.seagull.beedo.dao;
 
-import com.seagull.beedo.dao.dataobject.DocumentParseDO;
-import com.seagull.beedo.dao.dataobject.ElementParseDO;
+import com.seagull.beedo.dao.domain.ElementParseDO;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.PagingAndSortingRepository;
-import team.seagull.common.base.query.QueryBase;
 
 import java.util.List;
 

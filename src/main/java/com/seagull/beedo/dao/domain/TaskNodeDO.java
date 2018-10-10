@@ -2,9 +2,8 @@
  * beedo.com Inc.
  * Copyright (c) 2018- All Rights Reserved.
  */
-package com.seagull.beedo.dao.dataobject;
+package com.seagull.beedo.dao.domain;
 
-import com.seagull.beedo.model.TaskElementInfo;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -12,7 +11,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * 要执行的Document/Element集合

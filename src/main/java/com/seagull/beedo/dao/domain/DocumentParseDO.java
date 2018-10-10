@@ -2,7 +2,7 @@
  * beedo.com Inc.
  * Copyright (c) 2018- All Rights Reserved.
  */
-package com.seagull.beedo.dao.dataobject;
+package com.seagull.beedo.dao.domain;
 
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;

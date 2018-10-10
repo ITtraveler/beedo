@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -26,18 +27,30 @@ public class ParseDataComponent {
 
     /**
      * 保存数据
+     *
      * @param object
      * @param collectionName
      * @param indexFields
      */
     public void saveData(Object object, String collectionName, List<String> indexFields) {
         for (String indexField : indexFields) {
-            Index index = new Index();
-            index.named("INDEX_" + collectionName + "_" + indexField);
-            index.on(indexField, Sort.Direction.DESC);
-            index.unique();
-            optMongo.addIndex(collectionName, index);
+            if (!optMongo.isExistIndex(indexField, collectionName)) {
+                Index index = new Index();
+                index.named("INDEX_" + collectionName + "_" + indexField);
+                index.on(indexField, Sort.Direction.DESC);
+                index.unique();
+                optMongo.addIndex(collectionName, index);
+            }
         }
+
+        if (object == null) {
+            return;
+        }
+
+        if(object instanceof HashMap && ((HashMap) object).isEmpty()){
+            return;
+        }
+
         optMongo.insert(object, collectionName);
     }
 }

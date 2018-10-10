@@ -2,12 +2,10 @@
  * beedo.com Inc.
  * Copyright (c) 2018- All Rights Reserved.
  */
-package com.seagull.beedo.dao.dataobject;
+package com.seagull.beedo.dao.domain;
 
 import com.seagull.beedo.common.enums.TaskStatusEnum;
-import com.seagull.beedo.web.test;
 import lombok.Data;
-import lombok.Value;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;

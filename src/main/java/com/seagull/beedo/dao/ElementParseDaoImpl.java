@@ -4,10 +4,9 @@
  */
 package com.seagull.beedo.dao;
 
-import com.seagull.beedo.dao.dataobject.ElementParseDO;
+import com.seagull.beedo.dao.domain.ElementParseDO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 

@@ -4,7 +4,7 @@
  */
 package com.seagull.beedo.dao;
 
-import com.seagull.beedo.dao.dataobject.TaskNodeDO;
+import com.seagull.beedo.dao.domain.TaskNodeDO;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

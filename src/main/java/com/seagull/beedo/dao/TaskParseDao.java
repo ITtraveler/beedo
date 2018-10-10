@@ -4,15 +4,10 @@
  */
 package com.seagull.beedo.dao;
 
-import com.seagull.beedo.dao.dataobject.TaskParseDO;
+import com.seagull.beedo.dao.domain.TaskParseDO;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import javax.persistence.LockModeType;
-import java.util.List;
 
 /**
  * @author guosheng.huang

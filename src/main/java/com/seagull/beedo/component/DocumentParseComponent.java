@@ -5,16 +5,17 @@
 package com.seagull.beedo.component;
 
 import com.seagull.beedo.dao.DocumentParseDao;
-import com.seagull.beedo.dao.DocumentParseDaoImpl;
 import com.seagull.beedo.dao.ElementParseDao;
-import com.seagull.beedo.dao.dataobject.DocumentParseDO;
-import com.seagull.beedo.dao.dataobject.ElementParseDO;
+import com.seagull.beedo.dao.domain.DocumentParseDO;
+import com.seagull.beedo.dao.domain.ElementParseDO;
 import com.seagull.beedo.model.DocumentParseInfo;
 import com.seagull.beedo.model.ElementParseInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,6 +75,7 @@ public class DocumentParseComponent {
      * @param documentId
      * @return
      */
+    @Cacheable(value = "documentInfo",key = "#documentId")
     public DocumentParseInfo getDocumentById(int documentId) {
         DocumentParseInfo documentParseInfo = new DocumentParseInfo();
 
@@ -100,11 +102,15 @@ public class DocumentParseComponent {
      * @param elementId
      * @return
      */
+    @Cacheable(value = "elementInfo",key = "#elementId")
     public ElementParseInfo getElementById(int elementId) {
         ElementParseInfo elementParseInfo = new ElementParseInfo();
         Optional<ElementParseDO> elementParseDO = elementParseDao.findById(elementId);
-        BeanUtils.copyProperties(elementParseDO.get(), elementParseInfo);
-        return elementParseInfo;
+        if (elementParseDO.isPresent()) {
+            BeanUtils.copyProperties(elementParseDO.get(), elementParseInfo);
+            return elementParseInfo;
+        }
+        return null;
     }
 
     /**
@@ -146,6 +152,8 @@ public class DocumentParseComponent {
         return pageList;
     }
 
+
+    @CacheEvict(value = "documentInfo",key = "#documentParseInfo.id")
     @Transactional
     public boolean updateDocument(DocumentParseInfo documentParseInfo) {
         if (documentParseInfo.getId() == null || documentParseInfo.getId() <= 0) {
@@ -169,6 +177,8 @@ public class DocumentParseComponent {
         return true;
     }
 
+
+    @CacheEvict(value = "documentInfo",key = "#documentId")
     @Transactional
     public void deleteDocumentById(Integer documentId) {
         documentParseDao.deleteById(documentId);
@@ -176,6 +186,7 @@ public class DocumentParseComponent {
         logger.info(MessageFormat.format("删除解析的文档数据成功,documentId:{0}", documentId));
     }
 
+    @CacheEvict(value = "elementInfo",key = "#elementId")
     @Transactional
     public void deleteElementById(Integer elementId) {
         elementParseDao.deleteById(elementId);
