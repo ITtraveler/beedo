@@ -16,7 +16,9 @@ import org.springframework.data.jpa.repository.Query;
 public interface DocumentParseDao extends JpaRepository<DocumentParseDO, Integer> {
 
     @Modifying(clearAutomatically = true)
-    @Query(value = "update beedo_document as s set s.name = ?1 where id = ?2",nativeQuery = true)
+    @Query(value = "update beedo_document as s set s.name = ?1 where id = ?2", nativeQuery = true)
     int updateNameById(String name, Integer id);
 
+    @Query(value = "select  count(1) from beedo_document", nativeQuery = true)
+    int countAll();
 }

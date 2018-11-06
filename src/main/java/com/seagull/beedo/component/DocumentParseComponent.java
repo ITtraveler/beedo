@@ -145,7 +145,7 @@ public class DocumentParseComponent {
             documentParseInfo.setElements(elementParseInfos);
         }
 
-        int count = (int) documentParseDao.count();
+        int count = documentParseDao.countAll();
         Page page = Page.getInstance(new PageAttribute(queryBase.getPageNum(), queryBase.getPageSize()), count);
         PageList<DocumentParseInfo> pageList = PageList.getInstance(
                 documentParseInfos, page);

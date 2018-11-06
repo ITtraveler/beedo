@@ -204,7 +204,9 @@ public class ParseCoolExecute {
                         data.put(taskElementInfo.getField(), parse(subTaskParseInfo, parseResult.toString()));
                     } else {
                         data.put(taskElementInfo.getField(),
-                                parseResult == null ? taskElementInfo.getDefValue() : parseResult);
+                                (parseResult == null || StringUtils.isBlank(parseResult.toString())) ?
+                                        taskElementInfo.getDefValue()
+                                        : parseResult);
                     }
                 }
             }
