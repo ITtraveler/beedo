@@ -4,9 +4,6 @@
  */
 package com.seagull.beedo.web.controller;
 
-import com.seagull.beedo.component.DocumentParseComponent;
-import com.seagull.beedo.model.DocumentParseInfo;
-import com.seagull.beedo.model.ElementParseInfo;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,13 +14,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.seagull.beedo.common.query.DocumentQuery;
+import com.seagull.beedo.model.BeedoDocumentModel;
+import com.seagull.beedo.model.BeedoElementModel;
+import com.seagull.beedo.service.DocumentService;
+
 import team.seagull.common.base.common.page.PageList;
 import team.seagull.common.base.common.page.PageQueryResultConvert;
-import team.seagull.common.base.query.QueryBase;
 import team.seagull.common.base.result.CommonResult;
 import team.seagull.common.base.result.PageListResult;
 import team.seagull.common.base.utils.CollectionUtils;
-import team.seagull.common.base.utils.JsoupUtilSingleton;
 import team.seagull.common.base.utils.JsoupUtils;
 import team.seagull.common.base.utils.UrlMatchUtils;
 
@@ -32,7 +33,7 @@ import team.seagull.common.base.utils.UrlMatchUtils;
 public class BeedoDocumentController extends BaseController {
 
     @Autowired
-    private DocumentParseComponent documentParseComponent;
+    private DocumentService documentService;
 
     /**
      * 获取URL的HTML
@@ -55,7 +56,7 @@ public class BeedoDocumentController extends BaseController {
     }
 
     @GetMapping("/parse/query")
-    public Object getUrlSource(String parseUrl, ElementParseInfo elementParseInfo) {
+    public Object getUrlSource(String parseUrl, BeedoElementModel elementParseInfo) {
         CommonResult<String> result = new CommonResult<>();
 
         boolean urlValid = UrlMatchUtils.urlValid(parseUrl);
@@ -63,9 +64,8 @@ public class BeedoDocumentController extends BaseController {
             retFail(result, "url不合法！");
         }
 
-
-        Elements elements = JsoupUtils.getElements(JsoupUtils
-                .getConnect(parseUrl.replace(" ", "")), elementParseInfo.getCssQuery());
+        Elements elements = JsoupUtils.getElements(JsoupUtils.getConnect(parseUrl.replace(" ", "")),
+            elementParseInfo.getCssQuery());
 
         result.setData(elements.outerHtml());
         return result;
@@ -78,9 +78,10 @@ public class BeedoDocumentController extends BaseController {
      * @return
      */
     @PostMapping
-    public Object saveParseDocument(@RequestBody DocumentParseInfo documentParseInfo) {
+    public Object saveParseDocument(@RequestBody BeedoDocumentModel documentParseInfo) {
         CommonResult<String> result = new CommonResult<>();
-        boolean urlValid = UrlMatchUtils.urlValid(documentParseInfo.getProtocol() + documentParseInfo.getUrl());
+        boolean urlValid = UrlMatchUtils
+            .urlValid(documentParseInfo.getProtocol() + documentParseInfo.getUrl());
         if (!urlValid) {
             retFail(result, "url不合法！");
             return result;
@@ -91,7 +92,7 @@ public class BeedoDocumentController extends BaseController {
             return result;
         }
 
-        documentParseComponent.saveDocument(documentParseInfo);
+        documentService.saveDocument(documentParseInfo);
         return result;
     }
 
@@ -103,12 +104,12 @@ public class BeedoDocumentController extends BaseController {
      */
     @GetMapping("{id}")
     public Object getParseDocumentById(@PathVariable int id) {
-        CommonResult<DocumentParseInfo> result = new CommonResult<>();
+        CommonResult<BeedoDocumentModel> result = new CommonResult<>();
         if (id <= 0) {
             retFail(result, "查询失败");
             return result;
         }
-        result.setData(documentParseComponent.getDocumentById(id));
+        result.setData(documentService.getDocumentById(id));
         return result;
     }
 
@@ -121,9 +122,11 @@ public class BeedoDocumentController extends BaseController {
      */
     @GetMapping("/page/{page}/size/{size}")
     public Object getParseDocuments(@PathVariable int page, @PathVariable int size) {
-        PageListResult<DocumentParseInfo> result = new PageListResult<>();
-        PageList<DocumentParseInfo> documentPage = documentParseComponent.getDocumentPage(new QueryBase(page,
-                size));
+        PageListResult<BeedoDocumentModel> result = new PageListResult<>();
+        DocumentQuery documentQuery = new DocumentQuery();
+        documentQuery.setPageNum(page);
+        documentQuery.setPageSize(size);
+        PageList<BeedoDocumentModel> documentPage = documentService.getDocumentPage(documentQuery);
         PageQueryResultConvert.converToResult(result, documentPage);
         result.setCurrentPage(page);
         return result;
@@ -136,12 +139,9 @@ public class BeedoDocumentController extends BaseController {
      * @return
      */
     @PutMapping
-    public Object putParseDocument(@RequestBody DocumentParseInfo documentParseInfo) {
+    public Object putParseDocument(@RequestBody BeedoDocumentModel documentParseInfo) {
         CommonResult<String> result = new CommonResult<>();
-        boolean update = documentParseComponent.updateDocument(documentParseInfo);
-        if (!update) {
-            retFail(result);
-        }
+        documentService.updateDocument(documentParseInfo);
         return result;
     }
 
@@ -154,7 +154,7 @@ public class BeedoDocumentController extends BaseController {
     @DeleteMapping("{id}")
     public Object deleteParseDocument(@PathVariable int id) {
         CommonResult<String> result = new CommonResult<>();
-        documentParseComponent.deleteDocumentById(id);
+        documentService.deleteDocumentById(id);
         return result;
     }
 }

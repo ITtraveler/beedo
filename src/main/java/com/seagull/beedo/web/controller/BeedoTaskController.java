@@ -5,9 +5,9 @@
 package com.seagull.beedo.web.controller;
 
 import com.seagull.beedo.common.enums.TaskStatusEnum;
-import com.seagull.beedo.common.query.TaskQuery;
-import com.seagull.beedo.component.TaskParseComponent;
-import com.seagull.beedo.model.TaskParseInfo;
+import com.seagull.beedo.common.query.TaskParseQuery;
+import com.seagull.beedo.model.BeedoTaskParseModel;
+import com.seagull.beedo.service.TaskParseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import team.seagull.common.base.common.page.PageList;
 import team.seagull.common.base.common.page.PageQueryResultConvert;
-import team.seagull.common.base.query.QueryBase;
 import team.seagull.common.base.result.CommonResult;
 import team.seagull.common.base.result.PageListResult;
 import team.seagull.common.base.utils.StringUtils;
@@ -33,7 +32,7 @@ import team.seagull.common.base.utils.StringUtils;
 public class BeedoTaskController extends BaseController {
 
     @Autowired
-    private TaskParseComponent taskParseComponent;
+    private TaskParseService taskParseService;
 
     /**
      * 保存Task
@@ -42,9 +41,9 @@ public class BeedoTaskController extends BaseController {
      * @return
      */
     @PostMapping
-    public Object saveParseTask(@RequestBody TaskParseInfo taskParseInfo) {
+    public Object saveParseTask(@RequestBody BeedoTaskParseModel taskParseInfo) {
         CommonResult<String> result = new CommonResult<>();
-        taskParseComponent.saveTask(taskParseInfo);
+        taskParseService.saveTask(taskParseInfo);
         return result;
     }
 
@@ -56,8 +55,8 @@ public class BeedoTaskController extends BaseController {
      */
     @GetMapping("{uid}")
     public Object getParseTaskById(@PathVariable String uid) {
-        CommonResult<TaskParseInfo> result = new CommonResult<>();
-        TaskParseInfo taskParseInfo = taskParseComponent.getTaskByUid(uid);
+        CommonResult<BeedoTaskParseModel> result = new CommonResult<>();
+        BeedoTaskParseModel taskParseInfo = taskParseService.getTaskByUid(uid);
         result.setData(taskParseInfo);
         return result;
     }
@@ -71,9 +70,11 @@ public class BeedoTaskController extends BaseController {
      */
     @GetMapping("/page/{page}/size/{size}")
     public Object getParseTasks(@PathVariable int page, @PathVariable int size) {
-        PageListResult<TaskParseInfo> result = new PageListResult<>();
-        PageList<TaskParseInfo> pageList = taskParseComponent.getTaskPage(new TaskQuery(page,
-                size));
+        PageListResult<BeedoTaskParseModel> result = new PageListResult<>();
+        TaskParseQuery taskParseQuery = new TaskParseQuery();
+        taskParseQuery.setPageNum(page);
+        taskParseQuery.setPageSize(size);
+        PageList<BeedoTaskParseModel> pageList = taskParseService.getTaskPage(taskParseQuery);
         PageQueryResultConvert.converToResult(result, pageList);
         result.setCurrentPage(page);
         return result;
@@ -87,14 +88,15 @@ public class BeedoTaskController extends BaseController {
      * @return
      */
     @PutMapping("{uid}")
-    public Object putParseTask(@PathVariable String uid, @RequestBody TaskParseInfo taskParseInfo) {
+    public Object putParseTask(@PathVariable String uid,
+                               @RequestBody BeedoTaskParseModel taskParseInfo) {
         CommonResult<String> result = new CommonResult<>();
         if (!StringUtils.isEquals(uid, taskParseInfo.getUid())) {
             retFail(result);
             return result;
         }
 
-        boolean update = taskParseComponent.updateTask(taskParseInfo);
+        boolean update = taskParseService.updateTask(taskParseInfo);
         if (!update) {
             retFail(result);
         }
@@ -117,10 +119,7 @@ public class BeedoTaskController extends BaseController {
             return result;
         }
 
-        boolean update = taskParseComponent.updateTaskStatus(uid, taskStatusEnum);
-        if (!update) {
-            retFail(result);
-        }
+        taskParseService.updateTaskStatus(uid, taskStatusEnum);
         return result;
 
     }
@@ -134,7 +133,7 @@ public class BeedoTaskController extends BaseController {
     @DeleteMapping("{uid}")
     public Object deleteParseTask(@PathVariable String uid) {
         CommonResult<String> result = new CommonResult<>();
-        taskParseComponent.deleteTaskByUid(uid);
+        taskParseService.deleteTaskByUid(uid);
         return result;
     }
 
