@@ -4,18 +4,6 @@
  */
 package com.seagull.beedo.service.impl;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.seagull.beedo.common.enums.TaskStatusEnum;
@@ -28,13 +16,23 @@ import com.seagull.beedo.model.BeedoTaskNodeModel;
 import com.seagull.beedo.model.BeedoTaskParseModel;
 import com.seagull.beedo.model.TaskElementInfo;
 import com.seagull.beedo.service.TaskParseService;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import team.seagull.common.base.common.page.Page;
 import team.seagull.common.base.common.page.PageAttribute;
 import team.seagull.common.base.common.page.PageList;
 import team.seagull.common.base.utils.CollectionUtils;
 import team.seagull.common.base.utils.RandomUtils;
 import team.seagull.common.base.utils.StringUtils;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author guosheng.huang
@@ -45,10 +43,10 @@ public class TaskParseServiceImpl implements TaskParseService {
     /**
      * logger
      */
-    Logger                     logger = LoggerFactory.getLogger(TaskParseComponent.class);
+    Logger logger = LoggerFactory.getLogger(TaskParseComponent.class);
 
     @Autowired
-    private TaskNodeComponent  taskNodeComponent;
+    private TaskNodeComponent taskNodeComponent;
 
     @Autowired
     private TaskParseComponent taskParseComponent;
@@ -84,10 +82,10 @@ public class TaskParseServiceImpl implements TaskParseService {
         //Task
         BeedoTaskParse beedoTaskParse = taskParseComponent.queryByUid(uid);
         BeanUtils.copyProperties(beedoTaskParse, taskParseInfo);
-
+        taskParseInfo.setTaskStatus(TaskStatusEnum.codeOf(beedoTaskParse.getTaskStatus()));
         //node
         List<BeedoTaskNode> taskNodes = taskNodeComponent
-            .queryListByTaskParseUid(taskParseInfo.getUid());
+                .queryListByTaskParseUid(taskParseInfo.getUid());
         if (!CollectionUtils.isEmpty(taskNodes)) {
             taskParseInfo.setParseNodes(taskNodeDoToInfo(taskNodes));
         }
@@ -111,10 +109,11 @@ public class TaskParseServiceImpl implements TaskParseService {
         for (BeedoTaskParse beedoTaskParse : taskParsePageInfo.getList()) {
             BeedoTaskParseModel taskParseInfo = new BeedoTaskParseModel();
             BeanUtils.copyProperties(beedoTaskParse, taskParseInfo);
+            taskParseInfo.setTaskStatus(TaskStatusEnum.codeOf(beedoTaskParse.getTaskStatus()));
 
             //Task对应的所有node
             List<BeedoTaskNode> taskNodes = taskNodeComponent
-                .queryListByTaskParseUid(taskParseInfo.getUid());
+                    .queryListByTaskParseUid(taskParseInfo.getUid());
             if (!CollectionUtils.isEmpty(taskNodes)) {
                 taskParseInfo.setParseNodes(taskNodeDoToInfo(taskNodes));
             }
@@ -122,7 +121,7 @@ public class TaskParseServiceImpl implements TaskParseService {
         }
 
         Page page = Page.getInstance(new PageAttribute(query.getPageNum(), query.getPageSize()),
-            taskParsePageInfo.getSize());
+                taskParsePageInfo.getSize());
         PageList<BeedoTaskParseModel> pageList = PageList.getInstance(taskParseInfoList, page);
         return pageList;
     }
@@ -151,11 +150,11 @@ public class TaskParseServiceImpl implements TaskParseService {
 
     @Override
     public void updateTaskStatus(String uid, TaskStatusEnum statusEnum) {
-        Assert.isNull(statusEnum, "更新任务状态失败，状态为空");
+        Assert.isTrue(statusEnum != null, "更新任务状态失败，状态为空");
         //更新
         BeedoTaskParse beedoTaskParse = new BeedoTaskParse();
         beedoTaskParse.setUid(uid);
-        beedoTaskParse.setStatus(statusEnum.getCode());
+        beedoTaskParse.setTaskStatus(statusEnum.getCode());
         taskParseComponent.update(beedoTaskParse);
     }
 
@@ -182,11 +181,11 @@ public class TaskParseServiceImpl implements TaskParseService {
             BeedoTaskNodeModel taskNodeInfo = new BeedoTaskNodeModel();
             BeanUtils.copyProperties(taskNode, taskNodeInfo);
             LinkedHashMap<Object, TaskElementInfo> elementInfoMap = JSON
-                .parseObject(taskNode.getElementInfoMap(), LinkedHashMap.class);
+                    .parseObject(taskNode.getElementInfoMap(), LinkedHashMap.class);
             //对象变成hashMap转换问题处理
             for (Map.Entry<Object, TaskElementInfo> entry : elementInfoMap.entrySet()) {
                 elementInfoMap.put(entry.getKey(),
-                    JSON.parseObject(JSON.toJSONString(entry.getValue()), TaskElementInfo.class));
+                        JSON.parseObject(JSON.toJSONString(entry.getValue()), TaskElementInfo.class));
             }
             taskNodeInfo.setElementInfoMap(elementInfoMap);
             taskNodeInfos.add(taskNodeInfo);
@@ -196,6 +195,7 @@ public class TaskParseServiceImpl implements TaskParseService {
 
     /**
      * 保存任务节点
+     *
      * @param nodes
      * @param uid
      */
@@ -211,6 +211,7 @@ public class TaskParseServiceImpl implements TaskParseService {
 
     /**
      * 删除任务节点
+     *
      * @param uid
      */
     private void deleteTaskNodes(String uid) {

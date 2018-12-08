@@ -7,36 +7,30 @@ spring:
     name: beedo
   data:
     mongodb:
-      host: 127.0.0.1
+      host: mongodb
       port: 27017
       database: beedo
   jpa:
+    database-platform: com.seagull.beedo.config.SQLiteDialect
+    generate-ddl: true
     hibernate:
         ddl-auto: update
     database: mysql
     show-sql: true
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/beedo?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+    url: jdbc:mysql://mariadb:3306/beedo?useUnicode=true&characterEncoding=UTF-8&useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
     username: root
-    password: asd123asd
+    password:
   cache:
     ehcache:
       config: classpath:ehcache.xml
     type: ehcache
 
-mybatis:
-  mapper-locations: classpath:/mapper/*.xml
-  configuration:
-    cache-enabled: false
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
-
 management:
   endpoints:
     server:
-      port: 8889
+      port: 8890
     web:
       base-path: /actuator
       #开启所有端点

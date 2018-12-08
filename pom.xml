@@ -24,6 +24,7 @@
         <java.version>1.8</java.version>
         <targetJavaProject>${basedir}/src/main/java</targetJavaProject>
         <targetResourcesProject>${basedir}/src/main/resources</targetResourcesProject>
+        <dockerfile-maven-version>1.4.8</dockerfile-maven-version>
         <corepom.version>0.0.1-SNAPSHOT</corepom.version>
         <base.version>1.0.2-SNAPSHOT</base.version>
         <sqlite-jdbc.version>3.20.0</sqlite-jdbc.version>
@@ -193,6 +194,28 @@
                     <configurationFile>
                         mybatis-generator.xml
                     </configurationFile>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>${dockerfile-maven-version}</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- 设置镜像名 -->
+                    <repository>beedo</repository>
+                    <tag>${project.version}</tag>
+                    <buildArgs>
+                        <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                    </buildArgs>
                 </configuration>
             </plugin>
         </plugins>

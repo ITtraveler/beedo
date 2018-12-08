@@ -69,6 +69,11 @@ public class BeedoTaskParseModel {
     private boolean optimize;
 
 
+    /**
+     * 索引
+     */
+    private List<String> indexs;
+
 
     private String memo;
 

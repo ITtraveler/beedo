@@ -4,6 +4,7 @@
  */
 package com.seagull.beedo.web.controller;
 
+import com.seagull.beedo.common.enums.CommonStatusEnum;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -124,6 +125,7 @@ public class BeedoDocumentController extends BaseController {
     public Object getParseDocuments(@PathVariable int page, @PathVariable int size) {
         PageListResult<BeedoDocumentModel> result = new PageListResult<>();
         DocumentQuery documentQuery = new DocumentQuery();
+        documentQuery.setStatus(CommonStatusEnum.ENABLED.getCode());
         documentQuery.setPageNum(page);
         documentQuery.setPageSize(size);
         PageList<BeedoDocumentModel> documentPage = documentService.getDocumentPage(documentQuery);

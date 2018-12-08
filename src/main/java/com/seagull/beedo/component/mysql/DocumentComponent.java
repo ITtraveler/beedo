@@ -33,7 +33,6 @@ public interface DocumentComponent {
      *
      * @return 对象列表
      */
-    @Cacheable
     PageInfo<BeedoDocument> queryForPage(DocumentQuery query);
 
     /**

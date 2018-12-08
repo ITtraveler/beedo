@@ -4,16 +4,9 @@
  */
 package com.seagull.beedo.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-
 import com.github.pagehelper.PageInfo;
+import com.seagull.beedo.common.enums.ElementDataTypeEnum;
+import com.seagull.beedo.common.enums.ElementStructureTypeEnum;
 import com.seagull.beedo.common.query.DocumentQuery;
 import com.seagull.beedo.component.mysql.DocumentComponent;
 import com.seagull.beedo.component.mysql.ElementComponent;
@@ -22,10 +15,17 @@ import com.seagull.beedo.dao.domain.BeedoElement;
 import com.seagull.beedo.model.BeedoDocumentModel;
 import com.seagull.beedo.model.BeedoElementModel;
 import com.seagull.beedo.service.DocumentService;
-
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import team.seagull.common.base.common.page.Page;
 import team.seagull.common.base.common.page.PageAttribute;
 import team.seagull.common.base.common.page.PageList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author guosheng.huang
@@ -38,7 +38,7 @@ public class DocumentServiceImpl implements DocumentService {
     private DocumentComponent documentComponent;
 
     @Autowired
-    private ElementComponent  elementComponent;
+    private ElementComponent elementComponent;
 
     /**
      * 保存Document 及其 element
@@ -84,11 +84,13 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public BeedoElementModel getElementById(int elementId) {
-        BeedoElementModel elementParseInfo = new BeedoElementModel();
+        BeedoElementModel elementModel = new BeedoElementModel();
         BeedoElement beedoElement = elementComponent.queryById(elementId);
         if (beedoElement != null) {
-            BeanUtils.copyProperties(beedoElement, elementParseInfo);
-            return elementParseInfo;
+            BeanUtils.copyProperties(beedoElement, elementModel);
+            elementModel.setStructureType(ElementStructureTypeEnum.codeOf(beedoElement.getStructureType()));
+            elementModel.setDataType(ElementDataTypeEnum.codeOf(beedoElement.getDataType()));
+            return elementModel;
         }
         return null;
     }
@@ -117,7 +119,7 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         Page page = Page.getInstance(new PageAttribute(query.getPageNum(), query.getPageSize()),
-            documentPage.getSize());
+                documentPage.getSize());
         PageList<BeedoDocumentModel> pageList = PageList.getInstance(documentParseInfos, page);
         return pageList;
     }
@@ -125,7 +127,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public void updateDocument(BeedoDocumentModel beedoDocumentModel) {
         Assert.isNull(beedoDocumentModel.getId() != null || beedoDocumentModel.getId() <= 0,
-            "更新beedoDocumentModel失败，id需>=0");
+                "更新beedoDocumentModel失败，id需>=0");
 
         BeedoDocument beedoDocument = new BeedoDocument();
         BeanUtils.copyProperties(beedoDocumentModel, beedoDocument);
@@ -145,6 +147,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     /**
      * 删除elements
+     *
      * @param documentId
      */
     private void deleteElements(Integer documentId) {
@@ -160,6 +163,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     /**
      * 保持Document的元素
+     *
      * @param documentId
      * @param elements
      */
@@ -172,6 +176,8 @@ public class DocumentServiceImpl implements DocumentService {
             BeedoElement beedoElement = new BeedoElement();
             BeanUtils.copyProperties(elementParseInfo, beedoElement);
             beedoElement.setDocumentId(documentId);
+            beedoElement.setDataType(elementParseInfo.getDataType().getCode());
+            beedoElement.setStructureType(elementParseInfo.getStructureType().getCode());
             elementComponent.insert(beedoElement);
         });
     }
@@ -180,9 +186,11 @@ public class DocumentServiceImpl implements DocumentService {
         List<BeedoElementModel> elementModels = new ArrayList<>();
         List<BeedoElement> beedoElements = elementComponent.queryListByDocumentId(id);
         beedoElements.forEach(beedoElement -> {
-            BeedoElementModel elementParseInfo = new BeedoElementModel();
-            BeanUtils.copyProperties(beedoElement, elementParseInfo);
-            elementModels.add(elementParseInfo);
+            BeedoElementModel beedoElementModel = new BeedoElementModel();
+            BeanUtils.copyProperties(beedoElement, beedoElementModel);
+            beedoElementModel.setDataType(ElementDataTypeEnum.codeOf(beedoElement.getDataType()));
+            beedoElementModel.setStructureType(ElementStructureTypeEnum.codeOf(beedoElement.getStructureType()));
+            elementModels.add(beedoElementModel);
         });
         documentParseInfo.setElements(elementModels);
     }

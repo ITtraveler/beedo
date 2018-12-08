@@ -1,6 +1,5 @@
 package com.seagull.beedo.common.utils;
 
-import team.seagull.common.base.utils.StringUtils;
 import team.seagull.common.base.utils.UrlMatchUtils;
 
 import java.util.regex.Matcher;

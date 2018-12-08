@@ -44,7 +44,6 @@ public interface TaskParseComponent {
      *
      * @return 对象列表
      */
-    @Cacheable
     PageInfo<BeedoTaskParse> queryForPage(TaskParseQuery query);
 
     /**
@@ -62,7 +61,7 @@ public interface TaskParseComponent {
      * @return 实例对象
      */
 
-    @CachePut(key = "#BeedoTaskParse.id")
+    @CachePut(key = "#result.id")
     BeedoTaskParse update(BeedoTaskParse beedoTaskParse);
 
 

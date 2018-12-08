@@ -4,21 +4,6 @@
  */
 package com.seagull.beedo.core;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
-import org.springframework.stereotype.Component;
-
 import com.seagull.beedo.common.enums.ElementDataTypeEnum;
 import com.seagull.beedo.common.enums.ElementStructureTypeEnum;
 import com.seagull.beedo.common.enums.TaskStatusEnum;
@@ -31,10 +16,23 @@ import com.seagull.beedo.model.BeedoTaskParseModel;
 import com.seagull.beedo.model.TaskElementInfo;
 import com.seagull.beedo.service.DocumentService;
 import com.seagull.beedo.service.TaskParseService;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
+import org.springframework.stereotype.Component;
 import team.seagull.common.base.utils.CollectionUtils;
 import team.seagull.common.base.utils.JsoupUtilSingleton;
 import team.seagull.common.base.utils.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author guosheng.huang
@@ -45,69 +43,38 @@ public class ParseCoolExecute {
     /**
      * logger
      */
-    Logger                      logger       = LoggerFactory.getLogger(ParseCoolExecute.class);
-
-    /**
-     * 暂存区
-     */
-    private Map<String, Object> schedulerMap = new HashMap<>();
+    Logger logger = LoggerFactory.getLogger(ParseCoolExecute.class);
 
     @Autowired
-    private DocumentService     documentService;
+    private Map schedulerMap;
 
     @Autowired
-    private TaskParseService    taskParseService;
+    private DocumentService documentService;
 
     @Autowired
-    private ParseDataComponent  dataComponent;
+    private TaskParseService taskParseService;
+
+    @Autowired
+    private ParseDataComponent dataComponent;
 
     public void parseCool(List<BeedoTaskParseModel> parseInfos) {
         //任务执行
         parseInfos.forEach(taskParseInfo -> {
-            //不为有效状态->下一个
-            if (TaskStatusEnum.INIT == taskParseInfo.getTaskStatus()) {
+            if (TaskStatusEnum.VALID != taskParseInfo.getTaskStatus()) {
                 return;
             }
 
-            ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) schedulerMap
-                .get(taskParseInfo.getUid());
-
-            //创建一个scheduler
-            if (scheduler == null) {
-                if (taskParseInfo.getTaskStatus() == TaskStatusEnum.VALID) {
-                    scheduler = new ThreadPoolTaskScheduler();
-                    scheduler.initialize();
-                    scheduler.setThreadGroupName(taskParseInfo.getUid());
-                    schedulerMap.put(taskParseInfo.getUid(), scheduler);
-                } else if (taskParseInfo.getTaskStatus() == TaskStatusEnum.CLOSE) {
-                    //更新状态为INIT
-                    taskParseService.updateTaskStatus(taskParseInfo.getUid(), TaskStatusEnum.INIT);
-                    return;
-                }
-            }
-
-            //关闭任务
-            if (taskParseInfo.getTaskStatus() == TaskStatusEnum.CLOSE) {
-                scheduler.shutdown();
-                schedulerMap.remove(taskParseInfo.getUid());
-                logger.info("关闭定时任务，taskParseInfo：{}", taskParseInfo);
-                //更新状态为INIT
-                taskParseService.updateTaskStatus(taskParseInfo.getUid(), TaskStatusEnum.INIT);
-                return;
-            }
-
-            scheduler.setPoolSize(taskParseInfo.getThreadCoolSize());
+            ThreadPoolTaskScheduler scheduler = getThreadPoolTaskScheduler(taskParseInfo);
             scheduler.schedule(() -> {
 
                 //进行解析
-                List<Map<Object, Object>> parseResult = parse(taskParseInfo, null);
+                List<Map<Object, Object>> parseResult = parse(taskParseInfo);
 
-                // TODO: 2018/9/26 动态索引设置
                 // 将解析到的数据保存到mongodb及设置索引
                 for (Map data : parseResult) {
                     dataComponent.saveData(data, taskParseInfo.getCollectionName(),
-                        Arrays.asList("title"));
-                    System.out.println(data);
+                            getTaskParseIndexs(taskParseInfo));
+                    logger.info("任务{}({})解析完成，数据结果data：{}", taskParseInfo.getName(), taskParseInfo.getUid(), data);
                 }
             }, triggerContext -> {
                 String cron = taskParseInfo.getCron();
@@ -124,6 +91,11 @@ public class ParseCoolExecute {
                 return nextExecDate;
             });
         });
+    }
+
+
+    private List<Map<Object, Object>> parse(BeedoTaskParseModel taskParseInfo) {
+        return this.parse(taskParseInfo, null);
     }
 
     private List<Map<Object, Object>> parse(BeedoTaskParseModel taskParseInfo, String url) {
@@ -146,7 +118,7 @@ public class ParseCoolExecute {
 
             //获取该节点的Document信息
             BeedoDocumentModel documentParseInfo = documentService
-                .getDocumentById(taskNodeInfo.getDocumentId());
+                    .getDocumentById(taskNodeInfo.getDocumentId());
             if (documentParseInfo == null) {
                 logger.error("未找到解析信息，数据异常，请处理documentId:{}", taskNodeInfo.getDocumentId());
                 continue;
@@ -155,6 +127,14 @@ public class ParseCoolExecute {
             //该节点所解析的url,为父类直接用自身的url
             if (taskParseInfo.getLevel() == 0) {
                 url = documentParseInfo.getProtocol() + documentParseInfo.getUrl();
+             /*   List<String> resultUrl = UrlExpression.getResultUrl(url);
+                if(CollectionUtils.isEmpty(resultUrl)){
+                    continue;
+                }
+                if(resultUrl.size() == 1){
+                    url = resultUrl.get(0);
+                }else{
+                }*/
             }
 
             //该节点要解析的目标内容（一个Document可能配置了多个Element，即可能配置多个）
@@ -179,10 +159,10 @@ public class ParseCoolExecute {
 
                 //优化结果
                 parseResult = optimize(parseResult, documentParseInfo, taskParseInfo,
-                    elementParseInfo);
+                        elementParseInfo);
 
                 if (ElementStructureTypeEnum.ARRAY == elementParseInfo.getStructureType()
-                    && taskElementInfo.getExpand()) {
+                        && taskElementInfo.getExpand()) {
                     int size = ((List) parseResult).size();
                     if (size > maxLength) {
                         maxLength = size;
@@ -190,7 +170,7 @@ public class ParseCoolExecute {
                 }
 
                 if (ElementStructureTypeEnum.ARRAY == elementParseInfo.getStructureType()
-                    && taskElementInfo.getExpand()) {
+                        && taskElementInfo.getExpand()) {
                     Map<String, Object> valueMap = new HashMap<>();
                     valueMap.put("subTaskUid", taskElementInfo.getSubTaskUid());
                     valueMap.put("expandData", parseResult);
@@ -198,17 +178,17 @@ public class ParseCoolExecute {
                 } else {
                     //有子任务情况，进行递归获取子任务数据
                     if (ElementDataTypeEnum.URL == elementParseInfo.getDataType()
-                        && StringUtils.isNotBlank(taskElementInfo.getSubTaskUid())) {
+                            && StringUtils.isNotBlank(taskElementInfo.getSubTaskUid())) {
                         BeedoTaskParseModel subTaskParseInfo = taskParseService
-                            .getTaskByUid(taskElementInfo.getSubTaskUid());
+                                .getTaskByUid(taskElementInfo.getSubTaskUid());
                         //设置子项的url
                         data.put(taskElementInfo.getField(),
-                            parse(subTaskParseInfo, parseResult.toString()));
+                                parse(subTaskParseInfo, parseResult.toString()));
                     } else {
                         data.put(taskElementInfo.getField(),
-                            (parseResult == null || StringUtils.isBlank(parseResult.toString()))
-                                ? taskElementInfo.getDefValue()
-                                : parseResult);
+                                (parseResult == null || StringUtils.isBlank(parseResult.toString()))
+                                        ? taskElementInfo.getDefValue()
+                                        : parseResult);
                     }
                 }
             }
@@ -224,7 +204,7 @@ public class ParseCoolExecute {
     }
 
     /**
-     * 处理解析的数据，进行展开处理
+     * 处理解析的数据，数组数据进行展开处理
      *
      * @param data          单条数据
      * @param expandDataMap 需要展开的数据
@@ -253,9 +233,9 @@ public class ParseCoolExecute {
                 if (subTaskUid != null) {
                     //有缓存处理
                     BeedoTaskParseModel subTaskParseInfo = taskParseService
-                        .getTaskByUid(subTaskUid.toString());
+                            .getTaskByUid(subTaskUid.toString());
                     copyData.put("subData",
-                        parse(subTaskParseInfo, expandData.get(index).toString()));
+                            parse(subTaskParseInfo, expandData.get(index).toString()));
                 }
 
             }
@@ -283,15 +263,15 @@ public class ParseCoolExecute {
                         break;
                     case ATTR:
                         result = jsoupUtilSingleton.getAttr(url, elementParseInfo.getCssQuery(),
-                            elementParseInfo.getAttr());
+                                elementParseInfo.getAttr());
                         break;
                     case URL:
                         if (StringUtils.isNotBlank(elementParseInfo.getAttr())) {
                             result = jsoupUtilSingleton.getAttr(url, elementParseInfo.getCssQuery(),
-                                elementParseInfo.getAttr());
+                                    elementParseInfo.getAttr());
                         } else {
                             result = jsoupUtilSingleton.getText(url,
-                                elementParseInfo.getCssQuery());
+                                    elementParseInfo.getCssQuery());
                         }
                         break;
                     case HTML:
@@ -303,24 +283,24 @@ public class ParseCoolExecute {
                 switch (elementParseInfo.getDataType()) {
                     case TEXT:
                         result = jsoupUtilSingleton.getTextList(url,
-                            elementParseInfo.getCssQuery());
+                                elementParseInfo.getCssQuery());
                         break;
                     case ATTR:
                         result = jsoupUtilSingleton.getAttrList(url, elementParseInfo.getCssQuery(),
-                            elementParseInfo.getAttr());
+                                elementParseInfo.getAttr());
                         break;
                     case URL:
                         if (StringUtils.isNotBlank(elementParseInfo.getAttr())) {
                             result = jsoupUtilSingleton.getAttrList(url,
-                                elementParseInfo.getCssQuery(), elementParseInfo.getAttr());
+                                    elementParseInfo.getCssQuery(), elementParseInfo.getAttr());
                         } else {
                             result = jsoupUtilSingleton.getTextList(url,
-                                elementParseInfo.getCssQuery());
+                                    elementParseInfo.getCssQuery());
                         }
                         break;
                     case HTML:
                         result = jsoupUtilSingleton.getHtmlList(url,
-                            elementParseInfo.getCssQuery());
+                                elementParseInfo.getCssQuery());
                         break;
                 }
                 break;
@@ -328,11 +308,15 @@ public class ParseCoolExecute {
         return result;
     }
 
-    private Object optimize(Object obj, BeedoDocumentModel documentParseInfo,
-                            BeedoTaskParseModel taskParseInfo, BeedoElementModel elementParseInfo) {
+    private <T> T optimize(T obj, BeedoDocumentModel documentParseInfo,
+                           BeedoTaskParseModel taskParseInfo, BeedoElementModel elementParseInfo) {
         String baseUrl = documentParseInfo.getProtocol() + documentParseInfo.getUrl();
         switch (elementParseInfo.getStructureType()) {
             case ARRAY:
+                if (!(obj instanceof List)) {
+                    break;
+                }
+
                 List<String> list = new ArrayList<>();
                 for (String str : (List<String>) obj) {
                     // str = str.replace();
@@ -341,15 +325,63 @@ public class ParseCoolExecute {
                     }
                     list.add(str);
                 }
-                obj = list;
+                obj = (T) list;
                 break;
             case STRING:
+                if (!(obj instanceof String)) {
+                    break;
+                }
+
                 if (ElementDataTypeEnum.URL == elementParseInfo.getDataType()) {
-                    obj = OptimizeUtils.getVaildUrl(baseUrl, (String) obj);
+                    obj = (T) OptimizeUtils.getVaildUrl(baseUrl, (String) obj);
                 }
                 break;
         }
         return obj;
 
+    }
+
+
+    /**
+     * 获取解析任务的线程池
+     *
+     * @param taskParseInfo
+     * @return
+     */
+    private ThreadPoolTaskScheduler getThreadPoolTaskScheduler(BeedoTaskParseModel taskParseInfo) {
+        ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) schedulerMap.get(taskParseInfo.getUid());
+        //创建一个scheduler
+        if (scheduler == null) {
+            scheduler = new ThreadPoolTaskScheduler();
+            scheduler.initialize();
+            scheduler.setThreadGroupName(taskParseInfo.getUid());
+            schedulerMap.put(taskParseInfo.getUid(), scheduler);
+        }
+
+        scheduler.setPoolSize(taskParseInfo.getThreadCoolSize());
+        return scheduler;
+    }
+
+    /**
+     * 数据唯一性索引
+     * todo 考虑添加一字段存放索引
+     *
+     * @param taskParseInfo
+     * @return
+     */
+    @Cacheable(key = "'PARSE_INDEX_'+#taskParseInfo.uid")
+    public List<String> getTaskParseIndexs(BeedoTaskParseModel taskParseInfo) {
+        List<String> indexs = new ArrayList<>();
+        List<BeedoTaskNodeModel> parseNodes = taskParseInfo.getParseNodes();
+        for (BeedoTaskNodeModel taskNodeModel : parseNodes) {
+            Map<Object, TaskElementInfo> elementInfoMap = taskNodeModel.getElementInfoMap();
+            for (TaskElementInfo taskElementInfo : elementInfoMap.values()) {
+
+                if (taskElementInfo.getIsIndex()) {
+                    indexs.add(taskElementInfo.getField());
+                }
+            }
+        }
+        return indexs;
     }
 }

@@ -32,6 +32,11 @@ public class TaskParseQuery extends QueryDate {
     private String collectionName;
 
     /**
+     * 任务等级
+     */
+    private Integer level;
+
+    /**
      * 状态
      * CommonStatusEnum
      */

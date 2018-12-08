@@ -35,7 +35,6 @@ public interface ElementComponent {
      *
      * @return 对象列表
      */
-    @Cacheable
     PageInfo<BeedoElement> queryForPage(ElementQuery query);
 
 

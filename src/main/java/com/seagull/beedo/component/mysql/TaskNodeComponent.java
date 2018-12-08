@@ -46,7 +46,6 @@ public interface TaskNodeComponent {
      *
      * @return 对象列表
      */
-    @Cacheable
     List<BeedoTaskNode> queryListByTaskParseUid(String taskParseUid);
 
     /**

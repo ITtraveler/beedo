@@ -4,6 +4,7 @@
  */
 package com.seagull.beedo.web.controller;
 
+import com.seagull.beedo.common.enums.CommonStatusEnum;
 import com.seagull.beedo.common.enums.TaskStatusEnum;
 import com.seagull.beedo.common.query.TaskParseQuery;
 import com.seagull.beedo.model.BeedoTaskParseModel;
@@ -72,6 +73,7 @@ public class BeedoTaskController extends BaseController {
     public Object getParseTasks(@PathVariable int page, @PathVariable int size) {
         PageListResult<BeedoTaskParseModel> result = new PageListResult<>();
         TaskParseQuery taskParseQuery = new TaskParseQuery();
+        taskParseQuery.setStatus(CommonStatusEnum.ENABLED.getCode());
         taskParseQuery.setPageNum(page);
         taskParseQuery.setPageSize(size);
         PageList<BeedoTaskParseModel> pageList = taskParseService.getTaskPage(taskParseQuery);

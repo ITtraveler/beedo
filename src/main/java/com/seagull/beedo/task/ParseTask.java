@@ -9,10 +9,13 @@ import com.seagull.beedo.common.query.TaskParseQuery;
 import com.seagull.beedo.core.ParseCoolExecute;
 import com.seagull.beedo.model.BeedoTaskParseModel;
 import com.seagull.beedo.service.TaskParseService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import team.seagull.common.base.common.page.PageList;
+import team.seagull.common.base.utils.CollectionUtils;
 
 /**
  * 任务总执行器，每30s触发一次，redis记录各个ParseTask执行状态
@@ -22,6 +25,7 @@ import team.seagull.common.base.common.page.PageList;
  */
 @Component
 public class ParseTask extends BaseTask {
+    Logger logger = LoggerFactory.getLogger(ParseTask.class);
 
     @Autowired
     private ParseCoolExecute parseToolExecute;
@@ -35,14 +39,11 @@ public class ParseTask extends BaseTask {
         TaskParseQuery query = new TaskParseQuery();
         query.setPageNum(1);
         query.setPageSize(200);
+        query.setLevel(0);
         query.setTaskStatus(TaskStatusEnum.VALID.getCode());
-
-        PageList<BeedoTaskParseModel> taskPage = taskParseService.getTaskPage(query);
-        query.setTaskStatus(TaskStatusEnum.CLOSE.getCode());
-        PageList<BeedoTaskParseModel> taskPage1 = taskParseService.getTaskPage(query);
-        taskPage.getDatas().addAll(taskPage1.getDatas());
-        if (taskPage.getDatas().size() > 0) {
-            parseToolExecute.parseCool(taskPage.getDatas());
+        PageList<BeedoTaskParseModel> validTaskPage = taskParseService.getTaskPage(query);
+        if (!CollectionUtils.isEmpty(validTaskPage.getDatas())) {
+            parseToolExecute.parseCool(validTaskPage.getDatas());
         }
     }
 }

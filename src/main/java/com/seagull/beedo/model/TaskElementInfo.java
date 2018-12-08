@@ -8,6 +8,7 @@ import lombok.Data;
 
 /**
  * 任务元素信息
+ *
  * @author guosheng.huang
  * @version TaskElementInfo.java, v 0.1 2018年09月23日 22:18 guosheng.huang Exp $
  */
@@ -37,4 +38,16 @@ public class TaskElementInfo {
      * 是否需要展开，仅数据结构为数组时才可以数据展开
      */
     private Boolean expand = true;
+
+    /**
+     * 是否为唯一性索引
+     */
+    private Boolean isIndex = false;
+
+
+    /**
+     * 是否不为空数据
+     */
+    private Boolean isNotBlank;
+
 }
