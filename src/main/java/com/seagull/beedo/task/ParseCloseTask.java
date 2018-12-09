@@ -37,7 +37,7 @@ public class ParseCloseTask extends BaseTask {
     private Map schedulerMap;
 
 
-    @Scheduled(cron = "10 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     @Override
     public void exec() {
         TaskParseQuery query = new TaskParseQuery();
@@ -53,6 +53,11 @@ public class ParseCloseTask extends BaseTask {
         //关闭任务
         for (BeedoTaskParseModel taskParseModel : closeTaskPage.getDatas()) {
             ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) schedulerMap.get(taskParseModel.getUid());
+            if (scheduler == null) {
+                //更新状态为INIT
+                taskParseService.updateTaskStatus(taskParseModel.getUid(), TaskStatusEnum.INIT);
+                continue;
+            }
             scheduler.shutdown();
             schedulerMap.remove(taskParseModel.getUid());
             logger.info("关闭定时任务，taskParseModel：{}", taskParseModel);

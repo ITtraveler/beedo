@@ -5,6 +5,7 @@
 package com.seagull.beedo.model;
 
 import com.seagull.beedo.common.enums.TaskStatusEnum;
+import com.seagull.beedo.common.enums.TaskTypeEnum;
 import lombok.Data;
 
 import java.util.Date;
@@ -35,6 +36,11 @@ public class BeedoTaskParseModel {
      * 任务级别
      */
     private int level;
+
+    /**
+     * 任务类型
+     */
+    private TaskTypeEnum type;
 
     /**
      * 任务执行的cron表达式

@@ -7,6 +7,7 @@ package com.seagull.beedo.web.controller;
 import com.seagull.beedo.common.enums.CommonStatusEnum;
 import com.seagull.beedo.common.enums.TaskStatusEnum;
 import com.seagull.beedo.common.query.TaskParseQuery;
+import com.seagull.beedo.dao.mongodb.OptMongo;
 import com.seagull.beedo.model.BeedoTaskParseModel;
 import com.seagull.beedo.service.TaskParseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,8 @@ import team.seagull.common.base.result.CommonResult;
 import team.seagull.common.base.result.PageListResult;
 import team.seagull.common.base.utils.StringUtils;
 
+import java.util.Set;
+
 /**
  * @author guosheng.huang
  * @version $id:BeedoTaskController.java, v 0.1 2018年08月13日 20:56 guosheng.huang Exp $
@@ -34,6 +37,9 @@ public class BeedoTaskController extends BaseController {
 
     @Autowired
     private TaskParseService taskParseService;
+
+    @Autowired
+    private OptMongo optMongo;
 
     /**
      * 保存Task
@@ -107,6 +113,7 @@ public class BeedoTaskController extends BaseController {
 
     /**
      * 更新任务状态
+     *
      * @param uid
      * @param status
      * @return
@@ -139,4 +146,11 @@ public class BeedoTaskController extends BaseController {
         return result;
     }
 
+    @GetMapping("/collections")
+    public Object getCollectionNames() {
+        CommonResult<Set<String>> result = new CommonResult<>();
+        //todo cache
+        result.setData(optMongo.getCollectionNames());
+        return result;
+    }
 }

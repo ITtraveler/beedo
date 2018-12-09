@@ -33,7 +33,7 @@ public class ParseTask extends BaseTask {
     @Autowired
     private TaskParseService taskParseService;
 
-    @Scheduled(cron = "30 * * * * ?")
+    @Scheduled(cron = "0/30 * * * * ?")
     @Override
     public void exec() {
         TaskParseQuery query = new TaskParseQuery();

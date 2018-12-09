@@ -4,16 +4,17 @@
  */
 package com.seagull.beedo.component.mongo.impl;
 
-import java.util.HashMap;
-import java.util.List;
-
 import com.seagull.beedo.component.mongo.ParseDataComponent;
+import com.seagull.beedo.dao.mongodb.OptMongo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.stereotype.Component;
 
-import com.seagull.beedo.dao.mongodb.OptMongo;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * 解析数据组件
@@ -23,6 +24,8 @@ import com.seagull.beedo.dao.mongodb.OptMongo;
  */
 @Component
 public class ParseDataComponentImpl implements ParseDataComponent {
+
+    Logger logger = LoggerFactory.getLogger(ParseDataComponentImpl.class);
 
     @Autowired
     private OptMongo optMongo;
@@ -55,5 +58,6 @@ public class ParseDataComponentImpl implements ParseDataComponent {
         }
 
         optMongo.insert(object, collectionName);
+        logger.info("数据保存到Mongo成功collectionName：{}，data：{}", collectionName, object);
     }
 }

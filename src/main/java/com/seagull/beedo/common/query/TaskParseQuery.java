@@ -37,6 +37,12 @@ public class TaskParseQuery extends QueryDate {
     private Integer level;
 
     /**
+     * 任务类型
+     * TaskTypeEnum
+     */
+    private String type;
+
+    /**
      * 状态
      * CommonStatusEnum
      */

@@ -41,7 +41,7 @@
                 name = #{name,jdbcType=VARCHAR}
             </if>
             <if test="url != null">
-                url = #{url,jdbcType=INTEGER}
+                and url = #{url,jdbcType=INTEGER}
             </if>
             <if test="status != null">
                 status = #{status,jdbcType=VARCHAR}

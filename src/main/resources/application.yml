@@ -19,7 +19,7 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/beedo?useUnicode=true&characterEncoding=UTF-8&useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
     username: root
-    password: asd123asd
+    password:
   cache:
     ehcache:
       config: classpath:ehcache.xml

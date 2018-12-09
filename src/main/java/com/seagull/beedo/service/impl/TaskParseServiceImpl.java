@@ -7,6 +7,7 @@ package com.seagull.beedo.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.seagull.beedo.common.enums.TaskStatusEnum;
+import com.seagull.beedo.common.enums.TaskTypeEnum;
 import com.seagull.beedo.common.query.TaskParseQuery;
 import com.seagull.beedo.component.mysql.TaskNodeComponent;
 import com.seagull.beedo.component.mysql.TaskParseComponent;
@@ -58,6 +59,7 @@ public class TaskParseServiceImpl implements TaskParseService {
 
         BeedoTaskParse beedoTaskParse = new BeedoTaskParse();
         BeanUtils.copyProperties(taskParseModel, beedoTaskParse);
+        beedoTaskParse.setType(taskParseModel.getType().getCode());
 
         if (StringUtils.isBlank(beedoTaskParse.getCollectionName())) {
             beedoTaskParse.setCollectionName(RandomUtils.getUUID());
@@ -83,6 +85,7 @@ public class TaskParseServiceImpl implements TaskParseService {
         BeedoTaskParse beedoTaskParse = taskParseComponent.queryByUid(uid);
         BeanUtils.copyProperties(beedoTaskParse, taskParseInfo);
         taskParseInfo.setTaskStatus(TaskStatusEnum.codeOf(beedoTaskParse.getTaskStatus()));
+        taskParseInfo.setType(TaskTypeEnum.codeOf(beedoTaskParse.getType()));
         //node
         List<BeedoTaskNode> taskNodes = taskNodeComponent
                 .queryListByTaskParseUid(taskParseInfo.getUid());
@@ -110,6 +113,7 @@ public class TaskParseServiceImpl implements TaskParseService {
             BeedoTaskParseModel taskParseInfo = new BeedoTaskParseModel();
             BeanUtils.copyProperties(beedoTaskParse, taskParseInfo);
             taskParseInfo.setTaskStatus(TaskStatusEnum.codeOf(beedoTaskParse.getTaskStatus()));
+            taskParseInfo.setType(TaskTypeEnum.codeOf(beedoTaskParse.getType()));
 
             //Task对应的所有node
             List<BeedoTaskNode> taskNodes = taskNodeComponent
@@ -127,24 +131,26 @@ public class TaskParseServiceImpl implements TaskParseService {
     }
 
     @Override
-    public boolean updateTask(BeedoTaskParseModel taskParseInfo) {
-        if (taskParseInfo.getId() == null || taskParseInfo.getId() <= 0) {
+    public boolean updateTask(BeedoTaskParseModel taskParseModel) {
+        if (taskParseModel.getId() == null || taskParseModel.getId() <= 0) {
             return false;
         }
 
         //更新task信息
         BeedoTaskParse taskParse = new BeedoTaskParse();
-        BeanUtils.copyProperties(taskParseInfo, taskParse);
+        BeanUtils.copyProperties(taskParseModel, taskParse);
+
+        taskParse.setType(taskParseModel.getType().getCode());
         if (StringUtils.isBlank(taskParse.getCollectionName())) {
             taskParse.setCollectionName(RandomUtils.getUUID());
         }
         taskParseComponent.update(taskParse);
 
-        deleteTaskNodes(taskParseInfo.getUid());
+        deleteTaskNodes(taskParseModel.getUid());
 
         //task新的task节点
-        List<BeedoTaskNodeModel> nodes = taskParseInfo.getParseNodes();
-        insertTaskNode(nodes, taskParseInfo.getUid());
+        List<BeedoTaskNodeModel> nodes = taskParseModel.getParseNodes();
+        insertTaskNode(nodes, taskParseModel.getUid());
         return true;
     }
 
