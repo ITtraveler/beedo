@@ -12,11 +12,6 @@
         <property name="beginningDelimiter" value="`"/>
         <property name="endingDelimiter" value="`"/>
 
- <!--       <plugin type="com.yylc.generator.plugin.RenameClassPlugin">
-            <property name="searchString" value=""/>
-            <property name="replaceString" value=""/>
-        </plugin>-->
-
        <commentGenerator>
             <property name="suppressDate" value="true"/>
             <property name="suppressAllComments" value="false"/>
@@ -54,7 +49,7 @@
                enableCountByExample="false"
                enableDeleteByExample="false"
                enableUpdateByExample="false">
-            <property name="rootClass" value="com.yylc.platform.common.base.ToString"/>
+            <property name="rootClass" value="team.seagull.common.base.common.ToString"/>
             <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
         </table>
 
