@@ -1,7 +1,3 @@
-/**
- * yingyinglicai.com Inc.
- * Copyright (c) 2013-2018 All Rights Reserved.
- */
 package com.seagull.beedo.service.impl;
 
 import com.alibaba.fastjson.JSON;

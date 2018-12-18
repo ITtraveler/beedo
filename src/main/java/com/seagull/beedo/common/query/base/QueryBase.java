@@ -1,7 +1,3 @@
-/**
- * yingyinglicai.com Inc.
- * Copyright (c) 2013-2018 All Rights Reserved.
- */
 package com.seagull.beedo.common.query.base;
 
 import team.seagull.common.base.common.ToString;

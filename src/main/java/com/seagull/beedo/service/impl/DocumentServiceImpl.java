@@ -1,7 +1,3 @@
-/**
- * yingyinglicai.com Inc.
- * Copyright (c) 2013-2018 All Rights Reserved.
- */
 package com.seagull.beedo.service.impl;
 
 import com.github.pagehelper.PageInfo;
@@ -126,7 +122,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public void updateDocument(BeedoDocumentModel beedoDocumentModel) {
-        Assert.isNull(beedoDocumentModel.getId() != null || beedoDocumentModel.getId() <= 0,
+        Assert.isTrue(beedoDocumentModel.getId() != null || beedoDocumentModel.getId() <= 0,
                 "更新beedoDocumentModel失败，id需>=0");
 
         BeedoDocument beedoDocument = new BeedoDocument();
