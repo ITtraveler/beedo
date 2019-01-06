@@ -44,14 +44,14 @@
                              targetProject="${targetJavaProject}"
                              type="XMLMAPPER"/>
 
-        <table tableName="beedo_task_node"
+     <!--   <table tableName="beedo_task_node"
                enableSelectByExample="false"
                enableCountByExample="false"
                enableDeleteByExample="false"
                enableUpdateByExample="false">
             <property name="rootClass" value="team.seagull.common.base.common.ToString"/>
             <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
-        </table>
+        </table>-->
 
     </context>
 </generatorConfiguration>

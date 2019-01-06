@@ -1,9 +1,6 @@
 package com.seagull.beedo.dao;
 
-import com.seagull.beedo.common.query.ElementQuery;
 import com.seagull.beedo.common.query.TaskNodeQuery;
-import com.seagull.beedo.dao.domain.BeedoDocument;
-import com.seagull.beedo.dao.domain.BeedoElement;
 import com.seagull.beedo.dao.domain.BeedoTaskNode;
 
 import java.util.List;

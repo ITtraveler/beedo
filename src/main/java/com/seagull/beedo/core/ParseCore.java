@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import team.seagull.common.base.utils.CollectionUtils;
 import team.seagull.common.base.utils.JsoupUtilSingleton;
+import team.seagull.common.base.utils.RandomUtils;
 import team.seagull.common.base.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -82,6 +83,9 @@ public class ParseCore {
                 url = documentParseInfo.getProtocol() + documentParseInfo.getUrl();
             }
 
+
+            JsoupUtilSingleton jsoupUtilSingleton = new JsoupUtilSingleton();
+
             //该节点要解析的目标内容（一个Document可能配置了多个Element，即可能配置多个）
             Map<Object, TaskElementInfo> elementIdMap = taskNodeInfo.getElementInfoMap();
             for (Map.Entry entry : elementIdMap.entrySet()) {
@@ -94,7 +98,7 @@ public class ParseCore {
                 }
 
                 //元素解析结果
-                Object parseResult = getParseResult(url, elementParseInfo);
+                Object parseResult = getParseResult(url, jsoupUtilSingleton, elementParseInfo);
 
                 TaskElementInfo taskElementInfo = (TaskElementInfo) entry.getValue();
                 if (taskElementInfo == null) {
@@ -180,6 +184,11 @@ public class ParseCore {
                     //有缓存处理
                     BeedoTaskParseModel subTaskParseInfo = taskParseService
                             .getTaskByUid(subTaskUid.toString());
+                    try {
+                        Thread.sleep(RandomUtils.getRandomInt(10) * 1000);
+                    } catch (Exception e) {
+
+                    }
                     copyData.put("subData",
                             parse(subTaskParseInfo, expandData.get(index).toString()));
                 }
@@ -198,9 +207,10 @@ public class ParseCore {
      * @param elementParseInfo
      * @return
      */
-    private Object getParseResult(String url, BeedoElementModel elementParseInfo) {
+    private Object getParseResult(String url, JsoupUtilSingleton jsoupUtilSingleton,
+                                  BeedoElementModel elementParseInfo) {
         Object result = "";
-        JsoupUtilSingleton jsoupUtilSingleton = JsoupUtilSingleton.getJsoupUtilSingleton();
+        //JsoupUtilSingleton jsoupUtilSingleton = new JsoupUtilSingleton();//JsoupUtilSingleton.getJsoupUtilSingleton();
         switch (elementParseInfo.getStructureType()) {
             case STRING:
                 switch (elementParseInfo.getDataType()) {
