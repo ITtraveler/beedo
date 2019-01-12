@@ -121,7 +121,7 @@ public class TaskParseServiceImpl implements TaskParseService {
         }
 
         Page page = Page.getInstance(new PageAttribute(query.getPageNum(), query.getPageSize()),
-                taskParsePageInfo.getSize());
+                (int)taskParsePageInfo.getTotal());
         PageList<BeedoTaskParseModel> pageList = PageList.getInstance(taskParseInfoList, page);
         return pageList;
     }

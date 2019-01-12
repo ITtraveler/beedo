@@ -115,7 +115,7 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         Page page = Page.getInstance(new PageAttribute(query.getPageNum(), query.getPageSize()),
-                documentPage.getSize());
+                (int)documentPage.getTotal());
         PageList<BeedoDocumentModel> pageList = PageList.getInstance(documentParseInfos, page);
         return pageList;
     }

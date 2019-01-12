@@ -77,6 +77,7 @@
                 and gmt_create &lt;= #{endDate}
             </if>
         </where>
+        order by id desc
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
