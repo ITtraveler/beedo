@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author guosheng.huang
@@ -22,6 +22,6 @@ public class BeanConfig {
      */
     @Bean
     public Map schedulerMap() {
-        return new HashMap<String, ThreadPoolTaskScheduler>();
+        return new ConcurrentHashMap<String, ThreadPoolTaskScheduler>();
     }
 }
