@@ -13,8 +13,7 @@ import com.seagull.beedo.model.BeedoTaskNodeModel;
 import com.seagull.beedo.model.BeedoTaskParseModel;
 import com.seagull.beedo.model.TaskElementInfo;
 import com.seagull.beedo.service.TaskParseService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,12 +34,9 @@ import java.util.Map;
  * @author guosheng.huang
  * @version $Id: TaskParseServiceImpl, v1.0 2018年12月07日 15:14 guosheng.huang Exp $
  */
+@Slf4j
 @Service
 public class TaskParseServiceImpl implements TaskParseService {
-    /**
-     * logger
-     */
-    Logger logger = LoggerFactory.getLogger(TaskParseComponent.class);
 
     @Autowired
     private TaskNodeComponent taskNodeComponent;
@@ -121,7 +117,7 @@ public class TaskParseServiceImpl implements TaskParseService {
         }
 
         Page page = Page.getInstance(new PageAttribute(query.getPageNum(), query.getPageSize()),
-                (int)taskParsePageInfo.getTotal());
+                (int) taskParsePageInfo.getTotal());
         PageList<BeedoTaskParseModel> pageList = PageList.getInstance(taskParseInfoList, page);
         return pageList;
     }
@@ -135,6 +131,10 @@ public class TaskParseServiceImpl implements TaskParseService {
         //更新task信息
         BeedoTaskParse taskParse = new BeedoTaskParse();
         BeanUtils.copyProperties(taskParseModel, taskParse);
+        // TODO: 2019/1/28 临时存放，后期放到单独字段中
+        if (taskParseModel.getTaskStatus() == null || TaskStatusEnum.VALID == taskParseModel.getTaskStatus()) {
+            taskParse.setTaskStatus(TaskStatusEnum.MODIFIED.getCode());
+        }
 
         taskParse.setType(taskParseModel.getType().getCode());
         if (StringUtils.isBlank(taskParse.getCollectionName())) {

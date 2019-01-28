@@ -11,6 +11,7 @@ import com.seagull.beedo.model.BeedoTaskNodeModel;
 import com.seagull.beedo.model.BeedoTaskParseModel;
 import com.seagull.beedo.model.TaskElementInfo;
 import com.seagull.beedo.service.TaskParseService;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,11 +53,28 @@ public class ParseCoolExecute {
     public void parseCool(List<BeedoTaskParseModel> parseInfos) {
         //任务执行
         parseInfos.forEach(taskParseInfo -> {
-            if (TaskStatusEnum.VALID != taskParseInfo.getTaskStatus()) {
+            if (TaskStatusEnum.VALID != taskParseInfo.getTaskStatus()
+                    && TaskStatusEnum.MODIFIED != taskParseInfo.getTaskStatus()) {
                 return;
             }
 
-            ThreadPoolTaskScheduler scheduler = getThreadPoolTaskScheduler(taskParseInfo);
+            ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) schedulerMap.get(taskParseInfo.getUid());
+            //创建一个scheduler
+            if (scheduler == null) {
+                scheduler = initThreadPoolTaskScheduler(taskParseInfo);
+            } else {
+                //修改过，shutdown，重新初始化scheduler
+                if (TaskStatusEnum.MODIFIED == taskParseInfo.getTaskStatus()) {
+                    scheduler.shutdown();
+                    scheduler = initThreadPoolTaskScheduler(taskParseInfo);
+                } else {
+                    return;
+                }
+            }
+
+
+            scheduler.setPoolSize(NumberUtils.toInt("" + taskParseInfo.getThreadCoolSize(), 1));
+
             scheduler.schedule(() -> {
                 parseExecute(taskParseInfo);
 
@@ -74,7 +92,17 @@ public class ParseCoolExecute {
                 Date nextExecDate = trigger.nextExecutionTime(triggerContext);
                 return nextExecDate;
             });
+
+            taskParseService.updateTaskStatus(taskParseInfo.getUid(), TaskStatusEnum.VALID);
         });
+    }
+
+    private ThreadPoolTaskScheduler initThreadPoolTaskScheduler(BeedoTaskParseModel taskParseInfo) {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.initialize();
+        scheduler.setThreadGroupName(taskParseInfo.getUid());
+        schedulerMap.put(taskParseInfo.getUid(), scheduler);
+        return scheduler;
     }
 
     /**
@@ -137,10 +165,7 @@ public class ParseCoolExecute {
         ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) schedulerMap.get(taskParseInfo.getUid());
         //创建一个scheduler
         if (scheduler == null) {
-            scheduler = new ThreadPoolTaskScheduler();
-            scheduler.initialize();
-            scheduler.setThreadGroupName(taskParseInfo.getUid());
-            schedulerMap.put(taskParseInfo.getUid(), scheduler);
+            scheduler = initThreadPoolTaskScheduler(taskParseInfo);
         }
 
         scheduler.setPoolSize(taskParseInfo.getThreadCoolSize());

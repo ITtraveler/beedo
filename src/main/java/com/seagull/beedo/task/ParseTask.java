@@ -25,7 +25,6 @@ import team.seagull.common.base.utils.CollectionUtils;
  */
 @Component
 public class ParseTask extends BaseTask {
-    Logger logger = LoggerFactory.getLogger(ParseTask.class);
 
     @Autowired
     private ParseCoolExecute parseToolExecute;
@@ -44,6 +43,13 @@ public class ParseTask extends BaseTask {
         PageList<BeedoTaskParseModel> validTaskPage = taskParseService.getTaskPage(query);
         if (!CollectionUtils.isEmpty(validTaskPage.getDatas())) {
             parseToolExecute.parseCool(validTaskPage.getDatas());
+        }
+
+        //被修改到数据
+        query.setTaskStatus(TaskStatusEnum.MODIFIED.getCode());
+        PageList<BeedoTaskParseModel> modifiedTaskPage = taskParseService.getTaskPage(query);
+        if (!CollectionUtils.isEmpty(modifiedTaskPage.getDatas())) {
+            parseToolExecute.parseCool(modifiedTaskPage.getDatas());
         }
     }
 }

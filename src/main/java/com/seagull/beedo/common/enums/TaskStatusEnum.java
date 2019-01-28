@@ -15,6 +15,9 @@ public enum TaskStatusEnum {
 
     VALID("VALID", "有效"),
 
+    // todo 最好新增字段存放，否则容易与其它状态冲突
+    MODIFIED("MODIFIED", "被修改的"),
+
     CLOSE("CLOSE", "关闭");
 
     String code;
