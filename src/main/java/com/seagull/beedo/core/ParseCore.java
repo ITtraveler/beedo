@@ -211,56 +211,61 @@ public class ParseCore {
                                   BeedoElementModel elementParseInfo) {
         Object result = "";
         //JsoupUtilSingleton jsoupUtilSingleton = new JsoupUtilSingleton();//JsoupUtilSingleton.getJsoupUtilSingleton();
-        switch (elementParseInfo.getStructureType()) {
-            case STRING:
-                switch (elementParseInfo.getDataType()) {
-                    case TEXT:
-                        result = jsoupUtilSingleton.getText(url, elementParseInfo.getCssQuery());
-                        break;
-                    case ATTR:
-                        result = jsoupUtilSingleton.getAttr(url, elementParseInfo.getCssQuery(),
-                                elementParseInfo.getAttr());
-                        break;
-                    case URL:
-                        if (StringUtils.isNotBlank(elementParseInfo.getAttr())) {
+        try {
+            switch (elementParseInfo.getStructureType()) {
+                case STRING:
+                    switch (elementParseInfo.getDataType()) {
+                        case TEXT:
+                            result = jsoupUtilSingleton.getText(url, elementParseInfo.getCssQuery());
+                            break;
+                        case ATTR:
                             result = jsoupUtilSingleton.getAttr(url, elementParseInfo.getCssQuery(),
                                     elementParseInfo.getAttr());
-                        } else {
-                            result = jsoupUtilSingleton.getText(url,
-                                    elementParseInfo.getCssQuery());
-                        }
-                        break;
-                    case HTML:
-                        result = jsoupUtilSingleton.getHtml(url, elementParseInfo.getCssQuery());
-                        break;
-                }
-                break;
-            case ARRAY:
-                switch (elementParseInfo.getDataType()) {
-                    case TEXT:
-                        result = jsoupUtilSingleton.getTextList(url,
-                                elementParseInfo.getCssQuery());
-                        break;
-                    case ATTR:
-                        result = jsoupUtilSingleton.getAttrList(url, elementParseInfo.getCssQuery(),
-                                elementParseInfo.getAttr());
-                        break;
-                    case URL:
-                        if (StringUtils.isNotBlank(elementParseInfo.getAttr())) {
-                            result = jsoupUtilSingleton.getAttrList(url,
-                                    elementParseInfo.getCssQuery(), elementParseInfo.getAttr());
-                        } else {
+                            break;
+                        case URL:
+                            if (StringUtils.isNotBlank(elementParseInfo.getAttr())) {
+                                result = jsoupUtilSingleton.getAttr(url, elementParseInfo.getCssQuery(),
+                                        elementParseInfo.getAttr());
+                            } else {
+                                result = jsoupUtilSingleton.getText(url,
+                                        elementParseInfo.getCssQuery());
+                            }
+                            break;
+                        case HTML:
+                            result = jsoupUtilSingleton.getHtml(url, elementParseInfo.getCssQuery());
+                            break;
+                    }
+                    break;
+                case ARRAY:
+                    switch (elementParseInfo.getDataType()) {
+                        case TEXT:
                             result = jsoupUtilSingleton.getTextList(url,
                                     elementParseInfo.getCssQuery());
-                        }
-                        break;
-                    case HTML:
-                        result = jsoupUtilSingleton.getHtmlList(url,
-                                elementParseInfo.getCssQuery());
-                        break;
-                }
-                break;
+                            break;
+                        case ATTR:
+                            result = jsoupUtilSingleton.getAttrList(url, elementParseInfo.getCssQuery(),
+                                    elementParseInfo.getAttr());
+                            break;
+                        case URL:
+                            if (StringUtils.isNotBlank(elementParseInfo.getAttr())) {
+                                result = jsoupUtilSingleton.getAttrList(url,
+                                        elementParseInfo.getCssQuery(), elementParseInfo.getAttr());
+                            } else {
+                                result = jsoupUtilSingleton.getTextList(url,
+                                        elementParseInfo.getCssQuery());
+                            }
+                            break;
+                        case HTML:
+                            result = jsoupUtilSingleton.getHtmlList(url,
+                                    elementParseInfo.getCssQuery());
+                            break;
+                    }
+                    break;
+            }
+        } catch (Exception e) {
+            logger.error("jsoup数据爬取失败",e);
         }
+
         return result;
     }
 
