@@ -1,11 +1,9 @@
 package com.seagull.beedo.config;
 
 import com.seagull.beedo.dao.mongodb.OptMongo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDbFactory;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -28,16 +26,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .disable()
                 .authorizeRequests()
                 .anyRequest()
-                .permitAll()
-                .and()
-                .authorizeRequests()
-                .antMatchers("/actuator/*")
-                .authenticated();
+                .permitAll();
     }
 
     @Bean
     public OptMongo optMongo(MongoDbFactory mongoDbFactory, MongoConverter converter) {
         return new OptMongo(mongoDbFactory, converter);
     }
+
 
 }

@@ -1,6 +1,7 @@
 package com.seagull.beedo.common.query.base;
 
-import team.seagull.common.base.common.ToString;
+
+import com.seagull.beedo.common.ToString;
 
 /**
  * @author guosheng.huang

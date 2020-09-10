@@ -1,6 +1,7 @@
 package com.seagull.beedo.dao.domain;
 
-import team.seagull.common.base.common.ToString;
+
+import com.seagull.beedo.common.ToString;
 
 import java.util.Date;
 

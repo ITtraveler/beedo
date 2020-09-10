@@ -4,7 +4,9 @@
  */
 package com.seagull.beedo.core;
 
-import team.seagull.common.base.utils.CollectionUtils;
+
+
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;

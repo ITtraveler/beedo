@@ -4,6 +4,8 @@
  */
 package com.seagull.beedo.core;
 
+import cn.hutool.core.util.NumberUtil;
+import com.github.pagehelper.util.StringUtil;
 import com.seagull.beedo.common.enums.TaskStatusEnum;
 import com.seagull.beedo.common.enums.TaskTypeEnum;
 import com.seagull.beedo.component.mongo.ParseDataComponent;
@@ -11,7 +13,6 @@ import com.seagull.beedo.model.BeedoTaskNodeModel;
 import com.seagull.beedo.model.BeedoTaskParseModel;
 import com.seagull.beedo.model.TaskElementInfo;
 import com.seagull.beedo.service.TaskParseService;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
-import team.seagull.common.base.utils.CollectionUtils;
-import team.seagull.common.base.utils.StringUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.NumberUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,15 +74,15 @@ public class ParseCoolExecute {
             }
 
 
-            scheduler.setPoolSize(NumberUtils.toInt("" + taskParseInfo.getThreadCoolSize(), 1));
+            scheduler.setPoolSize(taskParseInfo.getThreadCoolSize());
 
             scheduler.schedule(() -> {
                 parseExecute(taskParseInfo);
 
             }, triggerContext -> {
-                String cron = taskParseInfo.getCron();
+                String cron = taskParseInfo.getCron().trim();
 
-                if (StringUtils.isBlank(cron)) {
+                if (StringUtil.isEmpty(cron)) {
                     return null;
                 }
 
@@ -92,7 +93,6 @@ public class ParseCoolExecute {
                 Date nextExecDate = trigger.nextExecutionTime(triggerContext);
                 return nextExecDate;
             });
-
             taskParseService.updateTaskStatus(taskParseInfo.getUid(), TaskStatusEnum.VALID);
         });
     }
@@ -121,7 +121,7 @@ public class ParseCoolExecute {
 
             TaskElementInfo taskElementInfo = taskParseInfo.getParseNodes().get(0).getElementInfoMap().get(URL_EXPRESSION_ELEMENT_KEY);
 
-            if (taskElementInfo == null || StringUtils.isBlank(taskElementInfo.getUrlExpression())) {
+            if (taskElementInfo == null || StringUtil.isEmpty(taskElementInfo.getUrlExpression())) {
                 logger.error("数据异常，任务节点配置信息存在空配置 taskParseInfo:{}", taskParseInfo);
                 return;
             }
@@ -132,13 +132,17 @@ public class ParseCoolExecute {
                         .getTaskByUid(taskElementInfo.getSubTaskUid());
                 List<Map<Object, Object>> parseResult = parseCore.parse(subTaskParseInfo, url);
                 saveDataToMongo(taskParseInfo.getCollectionName(), getTaskParseIndexs(subTaskParseInfo), parseResult);
-                logger.info("任务{}({})解析完成，解析结果parseResult：{}", taskParseInfo.getName(), taskParseInfo.getUid(), parseResult);
+                /*logger.info("任务{}({})解析完成，解析结果parseResult：{}", taskParseInfo.getName(), taskParseInfo.getUid(),
+                        parseResult);*/
+                logger.info("任务{}({})解析完成", taskParseInfo.getName(), taskParseInfo.getUid());
             }
             //元素组合任务
         } else {
             List<Map<Object, Object>> parseResult = parseCore.parse(taskParseInfo);
             saveDataToMongo(taskParseInfo.getCollectionName(), getTaskParseIndexs(taskParseInfo), parseResult);
-            logger.info("任务{}({})解析完成，解析结果parseResult：{}", taskParseInfo.getName(), taskParseInfo.getUid(), parseResult);
+            /*logger.info("任务{}({})解析完成，解析结果parseResult：{}", taskParseInfo.getName(), taskParseInfo.getUid(), parseResult);*/
+
+            logger.info("任务{}({})解析完成", taskParseInfo.getName(), taskParseInfo.getUid());
         }
     }
 

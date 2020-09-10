@@ -5,8 +5,15 @@
 package com.seagull.beedo.web.controller;
 
 import com.seagull.beedo.common.enums.CommonStatusEnum;
+import com.seagull.beedo.common.page.PageList;
+import com.seagull.beedo.common.page.PageQueryResultConvert;
+import com.seagull.beedo.common.result.CommonResult;
+import com.seagull.beedo.common.result.PageListResult;
+import com.seagull.beedo.common.utils.JsoupUtils;
+import com.seagull.beedo.common.utils.UrlMatchUtils;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,13 +28,6 @@ import com.seagull.beedo.model.BeedoDocumentModel;
 import com.seagull.beedo.model.BeedoElementModel;
 import com.seagull.beedo.service.DocumentService;
 
-import team.seagull.common.base.common.page.PageList;
-import team.seagull.common.base.common.page.PageQueryResultConvert;
-import team.seagull.common.base.result.CommonResult;
-import team.seagull.common.base.result.PageListResult;
-import team.seagull.common.base.utils.CollectionUtils;
-import team.seagull.common.base.utils.JsoupUtils;
-import team.seagull.common.base.utils.UrlMatchUtils;
 
 @RestController
 @RequestMapping("/document")

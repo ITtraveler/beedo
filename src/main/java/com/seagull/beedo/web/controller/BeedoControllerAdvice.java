@@ -4,16 +4,16 @@
  */
 package com.seagull.beedo.web.controller;
 
+import com.github.pagehelper.util.StringUtil;
 import com.seagull.beedo.common.enums.BeedoResultCodeEnum;
+import com.seagull.beedo.common.enums.StatusCode;
 import com.seagull.beedo.common.exception.BeedoCoreException;
+import com.seagull.beedo.common.result.CommonResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import team.seagull.common.base.Enum.StatusCode;
-import team.seagull.common.base.result.CommonResult;
-import team.seagull.common.base.utils.StringUtils;
 
 /**
  * ControllerAdvice
@@ -37,7 +37,7 @@ public class BeedoControllerAdvice {
         CommonResult<Object> result = new CommonResult<>();
         result.setData(exception.toString());
         result.setStatus(StatusCode.SysException.getStatus());
-        result.setMessage(StringUtils.isBlank(exception.getMessage())
+        result.setMessage(StringUtil.isEmpty(exception.getMessage())
             ? BeedoResultCodeEnum.DATA_ERROR.getMessage()
             : exception.getMessage());
         return result;

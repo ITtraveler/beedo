@@ -4,9 +4,10 @@
  */
 package com.seagull.beedo.web.controller;
 
-import team.seagull.common.base.Enum.MessageEnum;
-import team.seagull.common.base.Enum.StatusCode;
-import team.seagull.common.base.result.CommonResult;
+
+import com.seagull.beedo.common.enums.MessageEnum;
+import com.seagull.beedo.common.enums.StatusCode;
+import com.seagull.beedo.common.result.CommonResult;
 
 /**
  * @author guosheng.huang

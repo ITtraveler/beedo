@@ -52,20 +52,24 @@ public class OptMongo extends MongoTemplate {
         return collection;
     }
 
-    public void insert(Object object) {
+    @Override
+    public Object insert(Object object) {
         try {
             super.insert(object);
         } catch (Exception e) {
-            logger.error("mongodb 插入异常object:{0}", object, e);
+            logger.error("mongodb 插入异常object:{}", object, e);
         }
+        return object;
     }
 
-    public void insert(Object object, String collectionName) {
+    @Override
+    public Object insert(Object object, String collectionName) {
         try {
-            super.insert(object, collectionName);
+          return super.insert(object, collectionName);
         } catch (Exception e) {
-            logger.error("mongodb 插入异常object:{0}", object, e);
+            logger.error("mongodb 插入异常object:{}", object, e);
         }
+        return null;
     }
 
     /**
@@ -85,6 +89,7 @@ public class OptMongo extends MongoTemplate {
         return result;
     }
 
+    @Override
     public DeleteResult remove(Object object) {
         try {
             return super.remove(object);
@@ -94,6 +99,7 @@ public class OptMongo extends MongoTemplate {
         return null;
     }
 
+    @Override
     public <T> List<T> findAllAndRemove(Query query, Class<T> object) {
         try {
             return super.findAllAndRemove(query, object);

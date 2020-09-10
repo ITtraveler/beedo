@@ -7,6 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class BeedoApplicationTests {
@@ -24,6 +28,10 @@ public class BeedoApplicationTests {
         BeedoTaskParseModel.setThreadCoolSize(4);
         taskParseInfos.add(BeedoTaskParseModel);*/
         executeComponent.exec();
+        ReentrantLock reentrantLock = new ReentrantLock();
+
+        Condition condition = reentrantLock.newCondition();
+        condition.signalAll();
     }
 
 }

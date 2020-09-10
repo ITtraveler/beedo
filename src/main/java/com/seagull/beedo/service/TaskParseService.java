@@ -1,12 +1,12 @@
 package com.seagull.beedo.service;
 
+import com.seagull.beedo.common.page.PageList;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.seagull.beedo.common.enums.TaskStatusEnum;
 import com.seagull.beedo.common.query.TaskParseQuery;
 import com.seagull.beedo.model.BeedoTaskParseModel;
 
-import team.seagull.common.base.common.page.PageList;
 
 /**
  * @author guosheng.huang

@@ -5,6 +5,7 @@
 package com.seagull.beedo.task;
 
 import com.seagull.beedo.common.enums.TaskStatusEnum;
+import com.seagull.beedo.common.page.PageList;
 import com.seagull.beedo.common.query.TaskParseQuery;
 import com.seagull.beedo.model.BeedoTaskParseModel;
 import com.seagull.beedo.service.TaskParseService;
@@ -14,8 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
-import team.seagull.common.base.common.page.PageList;
-import team.seagull.common.base.utils.CollectionUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Map;
 

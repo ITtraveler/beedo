@@ -8,6 +8,7 @@ spring:
   data:
     mongodb:
       host: 127.0.0.1
+     # host: 60.205.207.196
       port: 27017
       database: beedo
   jpa:
@@ -16,22 +17,27 @@ spring:
     database: mysql
     show-sql: true
   datasource:
+    #url: jdbc:mysql://60.205.207.196:3306/beedo?useUnicode=true&characterEncoding=UTF-8&useSSL=false
     url: jdbc:mysql://127.0.0.1:3306/beedo?useUnicode=true&characterEncoding=UTF-8&useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
     username: root
-    password:
+    password: asd123asd
   cache:
     ehcache:
       config: classpath:ehcache.xml
     type: ehcache
+  security:
+    user:
+      name: hgsPiece
+      password: asd123asd
+
 
 mybatis:
   mapper-locations: classpath:/mapper/*.xml
   configuration:
     cache-enabled: false
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
+    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 management:
   endpoints:

@@ -1,11 +1,11 @@
 package com.seagull.beedo.service;
 
+import com.seagull.beedo.common.page.PageList;
 import com.seagull.beedo.common.query.DocumentQuery;
 import com.seagull.beedo.model.BeedoDocumentModel;
 import com.seagull.beedo.model.BeedoElementModel;
 
 import org.springframework.transaction.annotation.Transactional;
-import team.seagull.common.base.common.page.PageList;
 
 /**
  * @author guosheng.huang

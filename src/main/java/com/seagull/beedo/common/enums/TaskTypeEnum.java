@@ -4,7 +4,7 @@
  */
 package com.seagull.beedo.common.enums;
 
-import team.seagull.common.base.utils.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author guosheng.huang

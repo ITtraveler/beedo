@@ -5,17 +5,15 @@
 package com.seagull.beedo.task;
 
 import com.seagull.beedo.common.enums.TaskStatusEnum;
+import com.seagull.beedo.common.page.PageList;
 import com.seagull.beedo.common.query.TaskParseQuery;
 import com.seagull.beedo.core.ParseCoolExecute;
 import com.seagull.beedo.model.BeedoTaskParseModel;
 import com.seagull.beedo.service.TaskParseService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import team.seagull.common.base.common.page.PageList;
-import team.seagull.common.base.utils.CollectionUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * 任务总执行器，每30s触发一次，redis记录各个ParseTask执行状态

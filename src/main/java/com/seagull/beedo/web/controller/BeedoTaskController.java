@@ -6,7 +6,11 @@ package com.seagull.beedo.web.controller;
 
 import com.seagull.beedo.common.enums.CommonStatusEnum;
 import com.seagull.beedo.common.enums.TaskStatusEnum;
+import com.seagull.beedo.common.page.PageList;
+import com.seagull.beedo.common.page.PageQueryResultConvert;
 import com.seagull.beedo.common.query.TaskParseQuery;
+import com.seagull.beedo.common.result.CommonResult;
+import com.seagull.beedo.common.result.PageListResult;
 import com.seagull.beedo.dao.mongodb.OptMongo;
 import com.seagull.beedo.model.BeedoTaskParseModel;
 import com.seagull.beedo.service.TaskParseService;
@@ -19,11 +23,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import team.seagull.common.base.common.page.PageList;
-import team.seagull.common.base.common.page.PageQueryResultConvert;
-import team.seagull.common.base.result.CommonResult;
-import team.seagull.common.base.result.PageListResult;
-import team.seagull.common.base.utils.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Set;
 
@@ -99,7 +99,7 @@ public class BeedoTaskController extends BaseController {
     public Object putParseTask(@PathVariable String uid,
                                @RequestBody BeedoTaskParseModel taskParseInfo) {
         CommonResult<String> result = new CommonResult<>();
-        if (!StringUtils.isEquals(uid, taskParseInfo.getUid())) {
+        if (!StringUtils.equals(uid, taskParseInfo.getUid())) {
             retFail(result);
             return result;
         }
