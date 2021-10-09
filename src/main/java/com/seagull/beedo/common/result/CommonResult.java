@@ -19,6 +19,13 @@ public class CommonResult<T> extends BaseResult{
         this.data = data;
     }
 
+    public static CommonResult<Object> success(Object obj){
+        CommonResult<Object> result = new CommonResult<>();
+        result.setData(obj);
+        return result;
+    }
+
+
     public T getData() {
         return data;
     }

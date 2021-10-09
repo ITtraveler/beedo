@@ -4,7 +4,7 @@
  */
 package com.seagull.beedo.core;
 
-import cn.hutool.core.util.NumberUtil;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.util.StringUtil;
 import com.seagull.beedo.common.enums.TaskStatusEnum;
 import com.seagull.beedo.common.enums.TaskTypeEnum;
@@ -21,7 +21,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.NumberUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -62,10 +61,12 @@ public class ParseCoolExecute {
             ThreadPoolTaskScheduler scheduler = (ThreadPoolTaskScheduler) schedulerMap.get(taskParseInfo.getUid());
             //创建一个scheduler
             if (scheduler == null) {
+                logger.info("初始化任务 taskParseInfo：{}", JSON.toJSONString(taskParseInfo));
                 scheduler = initThreadPoolTaskScheduler(taskParseInfo);
             } else {
                 //修改过，shutdown，重新初始化scheduler
                 if (TaskStatusEnum.MODIFIED == taskParseInfo.getTaskStatus()) {
+                    logger.info("修改任务 taskParseInfo：{}", JSON.toJSONString(taskParseInfo));
                     scheduler.shutdown();
                     scheduler = initThreadPoolTaskScheduler(taskParseInfo);
                 } else {
@@ -110,7 +111,7 @@ public class ParseCoolExecute {
      *
      * @param taskParseInfo
      */
-    private void parseExecute(BeedoTaskParseModel taskParseInfo) {
+    public void parseExecute(BeedoTaskParseModel taskParseInfo) {
 
         //url表达式任务
         if (TaskTypeEnum.URL_EXPRESSION == taskParseInfo.getType()) {

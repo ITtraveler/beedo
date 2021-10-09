@@ -54,7 +54,12 @@ public class TaskParseServiceImpl implements TaskParseService {
         beedoTaskParse.setType(taskParseModel.getType().getCode());
 
         if (StringUtils.isBlank(beedoTaskParse.getCollectionName())) {
-            beedoTaskParse.setCollectionName(RandomUtils.getUUID());
+            int randomInt = RandomUtils.getRandomInt(6);
+            beedoTaskParse.setCollectionName(""+randomInt);
+            beedoTaskParse.setDbname(""+randomInt);
+        }else{
+            beedoTaskParse.setCollectionName(taskParseModel.getCollectionName());
+            beedoTaskParse.setDbname(taskParseModel.getCollectionName());
         }
 
         beedoTaskParse.setTaskStatus(TaskStatusEnum.INIT.getCode());

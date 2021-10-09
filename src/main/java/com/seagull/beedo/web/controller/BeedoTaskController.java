@@ -11,6 +11,7 @@ import com.seagull.beedo.common.page.PageQueryResultConvert;
 import com.seagull.beedo.common.query.TaskParseQuery;
 import com.seagull.beedo.common.result.CommonResult;
 import com.seagull.beedo.common.result.PageListResult;
+import com.seagull.beedo.core.ParseCoolExecute;
 import com.seagull.beedo.dao.mongodb.OptMongo;
 import com.seagull.beedo.model.BeedoTaskParseModel;
 import com.seagull.beedo.service.TaskParseService;
@@ -40,6 +41,9 @@ public class BeedoTaskController extends BaseController {
 
     @Autowired
     private OptMongo optMongo;
+
+    @Autowired
+    private ParseCoolExecute parseCoolExecute;
 
     /**
      * 保存Task
@@ -152,5 +156,27 @@ public class BeedoTaskController extends BaseController {
         //todo cache
         result.setData(optMongo.getCollectionNames());
         return result;
+    }
+
+
+    @PostMapping("/execAllTask/{size}")
+    public Object execAllTask(@PathVariable Integer size) {
+        TaskParseQuery query = new TaskParseQuery();
+        query.setPageNum(1);
+        query.setPageSize(size);
+        query.setLevel(0);
+        query.setTaskStatus(TaskStatusEnum.VALID.getCode());
+        PageList<BeedoTaskParseModel> validTaskPage = taskParseService.getTaskPage(query);
+        validTaskPage.getDatas().forEach(item -> {
+            parseCoolExecute.parseExecute(item);
+        });
+        return CommonResult.success(true);
+    }
+
+    @PostMapping("/execTask/{uid}")
+    public Object execAllTask(@PathVariable String uid) {
+        BeedoTaskParseModel model = taskParseService.getTaskByUid(uid);
+        parseCoolExecute.parseExecute(model);
+        return CommonResult.success(true);
     }
 }

@@ -13,7 +13,10 @@ public class OptimizeUtils {
         }
 
         baseUrl = getBaseUrl(baseUrl);
-        baseUrl.substring(0, baseUrl.indexOf("/", 2));
+        String protocol = baseUrl.substring(0, baseUrl.indexOf("/", 2));
+        if(url.substring(0,2).equals("//")){
+            return protocol+url;
+        }
 
         if (baseUrl.lastIndexOf("/") == baseUrl.length()) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
