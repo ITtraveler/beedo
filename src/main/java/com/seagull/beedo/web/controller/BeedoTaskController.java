@@ -15,6 +15,7 @@ import com.seagull.beedo.core.ParseCoolExecute;
 import com.seagull.beedo.dao.mongodb.OptMongo;
 import com.seagull.beedo.model.BeedoTaskParseModel;
 import com.seagull.beedo.service.TaskParseService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,9 +25,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author guosheng.huang
@@ -167,14 +170,32 @@ public class BeedoTaskController extends BaseController {
         query.setLevel(0);
         query.setTaskStatus(TaskStatusEnum.VALID.getCode());
         PageList<BeedoTaskParseModel> validTaskPage = taskParseService.getTaskPage(query);
+        ThreadPoolExecutor poolExecutor = new ThreadPoolExecutor(5, 6, 2, TimeUnit.MINUTES, new LinkedBlockingQueue());
+
         validTaskPage.getDatas().forEach(item -> {
-            parseCoolExecute.parseExecute(item);
+            poolExecutor.execute(() -> parseCoolExecute.parseExecute(item));
+        });
+        return CommonResult.success(true);
+    }
+
+    @PostMapping("/execCollectionTask/{collection}")
+    public Object execCollectionTask(@PathVariable String collection) {
+        TaskParseQuery query = new TaskParseQuery();
+        query.setPageNum(1);
+        query.setPageSize(100);
+        query.setCollectionName(collection);
+        query.setLevel(0);
+        query.setTaskStatus(TaskStatusEnum.VALID.getCode());
+        PageList<BeedoTaskParseModel> validTaskPage = taskParseService.getTaskPage(query);
+        ThreadPoolExecutor poolExecutor = new ThreadPoolExecutor(5, 6, 2, TimeUnit.MINUTES, new LinkedBlockingQueue());
+        validTaskPage.getDatas().forEach(item -> {
+            poolExecutor.execute(() -> parseCoolExecute.parseExecute(item));
         });
         return CommonResult.success(true);
     }
 
     @PostMapping("/execTask/{uid}")
-    public Object execAllTask(@PathVariable String uid) {
+    public Object execTask(@PathVariable String uid) {
         BeedoTaskParseModel model = taskParseService.getTaskByUid(uid);
         parseCoolExecute.parseExecute(model);
         return CommonResult.success(true);

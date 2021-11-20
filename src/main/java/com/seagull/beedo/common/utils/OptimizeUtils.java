@@ -7,6 +7,10 @@ import java.util.regex.Pattern;
 
 public class OptimizeUtils {
     public static String getVaildUrl(String baseUrl, String url) {
+        if(StringUtils.isBlank(url)){
+            return url;
+        }
+
         url = url.replace(" ", "").replace("\"", "").replace("\'", "");
         if (UrlMatchUtils.urlValid(url)) {
             return url;

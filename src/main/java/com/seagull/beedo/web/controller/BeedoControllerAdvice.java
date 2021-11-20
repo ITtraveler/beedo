@@ -46,6 +46,7 @@ public class BeedoControllerAdvice {
     @ExceptionHandler(value = { Exception.class })
     @ResponseBody
     public Object exception(Exception exception) {
+        logger.error("API接口调用，抛出异常", exception);
         CommonResult<Object> result = new CommonResult<>();
         result.setData(exception.toString());
         result.setStatus(StatusCode.SysException.getStatus());

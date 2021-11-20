@@ -288,6 +288,9 @@ public class ParseCore {
                     if (ElementDataTypeEnum.URL == elementParseInfo.getDataType()) {
                         str = OptimizeUtils.getVaildUrl(baseUrl, str);
                     }
+                    if(StringUtils.isBlank(str)){
+                        continue;
+                    }
                     list.add(str);
                 }
                 obj = (T) list;
